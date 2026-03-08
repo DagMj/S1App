@@ -1,0 +1,14 @@
+﻿__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.env
+.venv/
+.venv2/
+.git/
+.gitignore
+s1_mvp.db
+test_s1.db
+app/assets/generated/
+app/assets/test_generated/

@@ -1,0 +1,47 @@
+﻿services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: s1
+      POSTGRES_PASSWORD: s1
+      POSTGRES_DB: s1
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://s1:s1@db:5432/s1
+      JWT_SECRET_KEY: change-me-in-production
+      CORS_ORIGINS: http://localhost:5173
+      ASSET_STORAGE_BACKEND: local
+      ASSETS_DIR: app/assets/generated
+      ASSETS_LOCAL_URL_PREFIX: /assets
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app/assets/generated:/app/app/assets/generated
+      - ./backend:/app
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+

@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# Env and DB
+.env
+backend/.env
+frontend/.env
+*.db
+
+# Assets generated
+backend/app/assets/generated/*
+!backend/app/assets/generated/.gitkeep
+backend/app/assets/test_generated/*
+!backend/app/assets/test_generated/.gitkeep
