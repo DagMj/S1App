@@ -30,14 +30,13 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-if settings.asset_storage_backend.lower().strip() == 'local':
-    assets_abs = settings.assets_dir.resolve()
-    assets_abs.mkdir(parents=True, exist_ok=True)
-    app.mount(
-        settings.assets_local_url_prefix,
-        StaticFiles(directory=str(assets_abs)),
-        name='assets',
-    )
+assets_abs = settings.assets_dir.resolve()
+assets_abs.mkdir(parents=True, exist_ok=True)
+app.mount(
+    settings.assets_local_url_prefix,
+    StaticFiles(directory=str(assets_abs)),
+    name='assets',
+)
 
 
 def _wait_for_database(max_attempts: int = 20, sleep_seconds: float = 2.0) -> None:
