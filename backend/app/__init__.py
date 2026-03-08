@@ -1,3 +1,3 @@
-from .main import app
+﻿"""App package for S1 Eksamen API."""
 
-__all__ = ["app"]
+__all__: list[str] = []
