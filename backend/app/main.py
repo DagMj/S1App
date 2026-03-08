@@ -1,6 +1,9 @@
-﻿from fastapi import FastAPI
+﻿import time
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 import app.models  # noqa: F401
 from app.api.router import api_router
@@ -37,8 +40,23 @@ if settings.asset_storage_backend.lower().strip() == 'local':
     )
 
 
+def _wait_for_database(max_attempts: int = 20, sleep_seconds: float = 2.0) -> None:
+    last_error: Exception | None = None
+    for _ in range(max_attempts):
+        try:
+            with engine.connect() as conn:
+                conn.execute(text('SELECT 1'))
+            return
+        except Exception as exc:  # pragma: no cover
+            last_error = exc
+            time.sleep(sleep_seconds)
+    if last_error is not None:
+        raise last_error
+
+
 @app.on_event('startup')
 def on_startup() -> None:
+    _wait_for_database()
     register_all_generators()
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
@@ -50,7 +68,7 @@ def on_startup() -> None:
 
 @app.get('/health')
 def health() -> dict:
-    return {'status': 'ok'}
+    return {'status': 'ok', 'version': 'v1'}
 
 
 app.include_router(api_router, prefix=settings.api_prefix)
