@@ -18,3 +18,5 @@ backend/app/assets/generated/*
 !backend/app/assets/generated/.gitkeep
 backend/app/assets/test_generated/*
 !backend/app/assets/test_generated/.gitkeep
+.venv/
+.venv2/
