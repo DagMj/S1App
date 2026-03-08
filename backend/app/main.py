@@ -59,9 +59,8 @@ def _wait_for_database(max_attempts: int = 12, sleep_seconds: float = 1.5) -> No
 def on_startup() -> None:
     app.state.db_ready = False
 
-    register_all_generators()
-
     try:
+        register_all_generators()
         _wait_for_database()
         Base.metadata.create_all(bind=engine)
         db = SessionLocal()
@@ -81,6 +80,11 @@ def health() -> dict:
         'version': 'v1',
         'db_ready': bool(getattr(app.state, 'db_ready', False)),
     }
+
+
+@app.get('/')
+def root() -> dict:
+    return {'status': 'ok'}
 
 
 app.include_router(api_router, prefix=settings.api_prefix)
