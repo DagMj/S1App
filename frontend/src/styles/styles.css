@@ -359,6 +359,66 @@ select {
   margin: 0.5rem 0;
 }
 
+.hint-section {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.hint-content {
+  font-size: 0.95rem;
+}
+
+.hint-content > div.math-text > p {
+  margin: 0.2rem 0;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.choice-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.55rem 0.5rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: #f8fbfc;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  font-weight: 400;
+}
+
+.choice-btn:hover:not(:disabled) {
+  border-color: var(--brand);
+  background: #e8f8f4;
+}
+
+.choice-btn.selected {
+  border-color: var(--brand);
+  background: #d1f3f0;
+  color: #04585a;
+}
+
+.choice-letter {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.choice-value {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.choice-btn.selected .choice-value {
+  color: #04585a;
+}
+
 @media (max-width: 900px) {
   .grid-two,
   .mode-cards {
