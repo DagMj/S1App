@@ -185,7 +185,6 @@ export function ProblemCard({
         <div className={`feedback ${feedback.is_correct ? 'ok' : 'bad'}`}>
           <p>{feedback.feedback}</p>
           <p>Poeng: {feedback.score}/{feedback.max_points}</p>
-          <p>Sikkerhet: {feedback.confidence.toFixed(2)} {feedback.uncertain ? '(usikker)' : ''}</p>
           <div className="solution-sketch">
             <strong>Løsningsskisse:</strong>
             {feedback.solution_steps && feedback.solution_steps.length > 0 && (

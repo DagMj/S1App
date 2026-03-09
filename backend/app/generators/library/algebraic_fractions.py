@@ -117,14 +117,31 @@ class AlgebraicFractionsGenerator(BaseGenerator):
 
     # ── Top-level generate ────────────────────────────────────────────────────
 
+    @staticmethod
+    def _is_clean(expr: sp.Expr, x: sp.Symbol) -> bool:
+        """Return True if the simplified result has numerator degree ≤ 1."""
+        try:
+            num, _ = sp.fraction(expr)
+            deg = sp.Poly(sp.expand(num), x).degree()
+            return deg <= 1  # type: ignore[operator]
+        except Exception:
+            return True
+
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
         x = sp.Symbol('x')
         # Weight three_frac 3:1 — richer and more representative of exam problems
         subtype = rng.choices(['two_frac', 'three_frac'], weights=[1, 3])[0]
-        if subtype == 'two_frac':
-            return self._gen_two_frac(rng, x, seed)
-        return self._gen_three_frac(rng, x, seed)
+        gen = self._gen_two_frac if subtype == 'two_frac' else self._gen_three_frac
+        # Retry until the simplified answer is clean (deg-1 numerator)
+        last: ProblemData | None = None
+        for _ in range(20):
+            attempt_rng = random.Random(rng.randint(1, 10**9))
+            result = gen(attempt_rng, x, seed)
+            last = result
+            if self._is_clean(sp.sympify(result.correct_answer), x):
+                return result
+        return last  # type: ignore[return-value]
 
     # ── two_frac: a/(d1) OP b/(d2) ───────────────────────────────────────────
 
