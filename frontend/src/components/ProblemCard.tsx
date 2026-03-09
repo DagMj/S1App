@@ -11,6 +11,7 @@ const answerTypeLabels: Record<string, string> = {
   function: 'Funksjon',
   multiple_choice: 'Flervalg',
   model_choice: 'Modellvalg',
+  interval: 'Intervall',
 }
 
 function humanize(value: string): string {

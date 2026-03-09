@@ -48,6 +48,21 @@ export function TrainingPage() {
     }
   }
 
+  async function quickStart(key: string) {
+    setError('')
+    try {
+      const start = await startTraining('training_single', [key])
+      setMode('training_single')
+      setSelectedKeys([key])
+      setSessionId(start.session_id)
+      const next = await nextTrainingProblem(start.session_id)
+      setProblem(next)
+      setFeedback(null)
+    } catch (err) {
+      setError((err as Error).message)
+    }
+  }
+
   async function submit(answer: string) {
     if (!sessionId || !problem) return
     const res = await submitAnswer(sessionId, problem.session_item_id, answer)
@@ -109,10 +124,20 @@ export function TrainingPage() {
                       }
                     }}
                   />
-                  <div>
+                  <div className="gen-item-info">
                     <strong>{g.name}</strong>
                     <p>{g.tema}</p>
                   </div>
+                  <button
+                    className="btn btn-xs"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      void quickStart(g.key)
+                    }}
+                    title="Start trening med bare denne"
+                  >
+                    Tren →
+                  </button>
                 </label>
               )
             })}
