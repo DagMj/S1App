@@ -44,9 +44,9 @@ class LogarithmicEquationGenerator(BaseGenerator):
             ax = _ax_display(a)
             prompt = f'Løs likningen $$\\log_{{{base}}}({ax} {c_sign} {c_abs}) = {exp}$$'
             steps = [
-                f'Skriv om til eksponentialform: {ax} {c_sign} {c_abs} = {base}^{exp} = {rhs}.',
-                f'Løs den lineære likningen: x = {x}.',
-                f'Svar: x = {x}.',
+                f'Skriv om til eksponentialform: ${ax} {c_sign} {c_abs} = {base}^{{{exp}}} = {rhs}$.',
+                f'Løs den lineære likningen: $x = {x}$.',
+                f'Svar: $x = {x}$.',
             ]
         else:
             base = rng.choice([2, 3, 5, 10])
@@ -58,9 +58,9 @@ class LogarithmicEquationGenerator(BaseGenerator):
                 f'= \\log_{{{base}}}({rhs})$$'
             )
             steps = [
-                f'Domene: x > {m}.',
-                f'Bruk log-regel: log(x) + log(x-{m}) = log(x(x-{m})).',
-                f'Da får vi x(x-{m}) = {rhs}, som gir x = {x} i domenet.',
+                f'Domene: $x > {m}$.',
+                f'Bruk log-regel: $\\log_{{{base}}}(x) + \\log_{{{base}}}(x-{m}) = \\log_{{{base}}}(x(x-{m}))$.',
+                f'Da får vi $x(x-{m}) = {rhs}$, som gir $x = {x}$ i domenet.',
             ]
 
         return ProblemData(
@@ -69,7 +69,7 @@ class LogarithmicEquationGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=x,
-            solution_short=f'x = {x}',
+            solution_short=f'$x = {x}$',
             solution_steps=steps,
             metadata={'tema': 'logaritmer', 'difficulty': 3, 'latex': True, 'subtype': subtype},
             assets=[],

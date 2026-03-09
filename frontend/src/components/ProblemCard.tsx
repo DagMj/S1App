@@ -1,4 +1,4 @@
-﻿import { KeyboardEvent, useEffect, useMemo, useState } from 'react'
+import { KeyboardEvent, useEffect, useMemo, useState } from 'react'
 import { InlineMath } from 'react-katex'
 
 import { MathText } from './MathText'
@@ -93,6 +93,11 @@ export function ProblemCard({
   const canAdvanceWithEnter = Boolean(feedback && onAdvance)
   const previewLatex = useMemo(() => toInlineLatex(answer), [answer])
 
+  const isMultipleChoice = problem.answer_type === 'multiple_choice'
+  const choices = isMultipleChoice && problem.metadata.choices
+    ? (problem.metadata.choices as Record<string, string>)
+    : null
+
   async function handleSubmit() {
     if (isLocked || loading || answer.trim().length === 0) return
     setLoading(true)
@@ -138,34 +143,55 @@ export function ProblemCard({
       )}
 
       {hint && (
-        <div className="row-actions">
-          <button className="ghost" onClick={() => setShowHint((v) => !v)}>
+        <div className="hint-section">
+          <button className="ghost" style={{ justifySelf: 'start' }} onClick={() => setShowHint((v) => !v)}>
             {showHint ? 'Skjul hint' : 'Vis hint'}
           </button>
-          {showHint && <p><strong>Tips:</strong> {hint}</p>}
+          {showHint && (
+            <div className="hint-content">
+              <strong>Tips:</strong>
+              <MathText text={hint} />
+            </div>
+          )}
         </div>
       )}
 
       <div className="answer-area">
-        <div className="answer-input-wrap">
-          <input
-            className="answer-input"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder="Skriv svaret ditt"
-            disabled={isLocked && !canAdvanceWithEnter}
-          />
+        {choices ? (
+          <div className="choice-grid">
+            {Object.entries(choices).map(([letter, value]) => (
+              <button
+                key={letter}
+                className={`choice-btn${answer === letter ? ' selected' : ''}`}
+                onClick={() => !isLocked && setAnswer(letter)}
+                disabled={(isLocked && !canAdvanceWithEnter) || Boolean(feedback)}
+              >
+                <span className="choice-letter">{letter}</span>
+                <span className="choice-value">{value}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="answer-input-wrap">
+            <input
+              className="answer-input"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="Skriv svaret ditt"
+              disabled={isLocked && !canAdvanceWithEnter}
+            />
 
-          {answer.trim().length > 0 && (
-            <div className="answer-preview-box">
-              <span className="answer-preview-label">Mattevisning:</span>
-              <span className="answer-preview-math">
-                <InlineMath math={previewLatex} renderError={() => <span>{answer}</span>} />
-              </span>
-            </div>
-          )}
-        </div>
+            {answer.trim().length > 0 && (
+              <div className="answer-preview-box">
+                <span className="answer-preview-label">Mattevisning:</span>
+                <span className="answer-preview-math">
+                  <InlineMath math={previewLatex} renderError={() => <span>{answer}</span>} />
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         <button
           onClick={() => {
@@ -183,7 +209,7 @@ export function ProblemCard({
 
       {feedback && (
         <div className={`feedback ${feedback.is_correct ? 'ok' : 'bad'}`}>
-          <p>{feedback.feedback}</p>
+          <MathText text={feedback.feedback} />
           <p>Poeng: {feedback.score}/{feedback.max_points}</p>
           <div className="solution-sketch">
             <strong>Løsningsskisse:</strong>

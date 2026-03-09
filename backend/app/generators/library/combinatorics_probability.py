@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import math
 import random
@@ -7,13 +7,23 @@ from app.generators.core.base import BaseGenerator
 from app.generators.core.types import EvalResult, GeneratorMeta, ProblemData
 from app.generators.library.common import default_evaluate, default_solution
 
+# Norwegian color names (adjective form used with "kuler")
+_COLORS = ['røde', 'blå', 'grønne', 'gule', 'hvite', 'svarte']
+
+
+def _color_desc(counts: dict[str, int]) -> str:
+    parts = [f'{n} {color}' for color, n in counts.items()]
+    if len(parts) == 1:
+        return parts[0] + ' kuler'
+    return ', '.join(parts[:-1]) + ' og ' + parts[-1] + ' kuler'
+
 
 class CombinatoricsProbabilityGenerator(BaseGenerator):
     def metadata(self) -> GeneratorMeta:
         return GeneratorMeta(
             key='combinatorics_probability',
             name='Kombinatorikk og sannsynlighet',
-            description='Kombinatorikk- og sannsynlighetsoppgaver for S1.',
+            description='Trekking av kuler fra pose – fire varianter (ordnet/uordnet, med/uten tilbakelegging).',
             tema='Sannsynlighet',
             part='del2',
             answer_type='number',
@@ -23,43 +33,83 @@ class CombinatoricsProbabilityGenerator(BaseGenerator):
 
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
-        subtype = rng.choice(['comb', 'perm', 'prob'])
 
-        if subtype == 'comb':
-            n = rng.choice([9, 10, 11, 12, 13, 14])
-            k = rng.choice([3, 4, 5])
-            ans = math.comb(n, k)
-            prompt = f'Hvor mange ulike grupper på {k} elever kan lages fra {n} elever?'
-            steps = [
-                'Når rekkefølgen ikke betyr noe, bruker vi kombinasjoner.',
-                f'Formel: C(n,k)=n!/(k!(n-k)!). Her: C({n},{k})={n}!/({k}!({n-k})!).',
-                f'Beregning gir C({n},{k})={ans}.',
-            ]
+        # --- Build the bag of balls ---
+        num_colors = rng.choice([2, 3])
+        color_names = rng.sample(_COLORS, num_colors)
+        counts: dict[str, int] = {c: rng.randint(3, 7) for c in color_names}
+        n = sum(counts.values())
 
-        elif subtype == 'perm':
-            n = rng.choice([7, 8, 9, 10])
-            k = rng.choice([3, 4])
+        # k must be < n for non-replacement variants, and small enough for combinatorics
+        k = rng.choice([2, 3])
+        while k >= n:
+            k += 1
+
+        color_desc = _color_desc(counts)
+        bag_intro = f'I en pose er det {color_desc} ({n} kuler totalt).'
+
+        subtype = rng.choice([
+            'ordered_no_replace',
+            'ordered_replace',
+            'unordered_no_replace',
+            'unordered_replace',
+        ])
+
+        if subtype == 'ordered_no_replace':
             ans = math.perm(n, k)
-            prompt = f'På hvor mange måter kan {k} ulike verv fordeles blant {n} elever?'
-            steps = [
-                'Når rekkefølgen betyr noe, bruker vi permutasjoner.',
-                f'Formel: P(n,k)=n!/(n-k)!. Her: P({n},{k})={n}!/({n-k})!.',
-                f'Beregning gir P({n},{k})={ans}.',
-            ]
-
-        else:
-            total = rng.choice([8, 10, 12, 15])
-            good = rng.choice([2, 3, 4, 5, 6])
-            if good >= total:
-                good = total - 1
-            ans = round(good / total, 4)
             prompt = (
-                f'I en pose er det {good} røde og {total-good} blå kuler. '
-                'En kule trekkes tilfeldig. Hva er sannsynligheten for rød kule?'
+                f'{bag_intro} '
+                f'Du trekker {k} kuler etter hverandre uten tilbakelegging, '
+                'og rekkefølgen du trekker dem i betyr noe. '
+                f'På hvor mange ulike måter kan dette gjøres?'
             )
             steps = [
-                f'Formel: P(A)=antall gunstige / antall mulige = {good}/{total}.',
-                f'P(rød) = {ans}.',
+                'Rekkefølgen betyr noe og vi legger ikke tilbake → permutasjon uten tilbakelegging.',
+                f'Formel: $P(n, k) = \\dfrac{{n!}}{{(n-k)!}}$',
+                f'$P({n}, {k}) = \\dfrac{{{n}!}}{{{n-k}!}} = {ans}$',
+            ]
+
+        elif subtype == 'ordered_replace':
+            ans = n ** k
+            prompt = (
+                f'{bag_intro} '
+                f'Du trekker {k} kuler etter hverandre med tilbakelegging '
+                '(kula legges tilbake og posen ristes mellom hver trekking), '
+                'og rekkefølgen betyr noe. '
+                f'På hvor mange ulike måter kan dette gjøres?'
+            )
+            steps = [
+                'Rekkefølgen betyr noe og vi legger tilbake → multiplikasjonsprinsippet.',
+                f'For hvert av {k} trekk er det {n} mulige kuler.',
+                f'Totalt: ${n}^{{{k}}} = {ans}$',
+            ]
+
+        elif subtype == 'unordered_no_replace':
+            ans = math.comb(n, k)
+            prompt = (
+                f'{bag_intro} '
+                f'Du trekker {k} kuler på én gang uten tilbakelegging. '
+                'Vi bryr oss ikke om rekkefølgen. '
+                f'Hvor mange ulike utvalg på {k} kuler er mulig?'
+            )
+            steps = [
+                'Vi bryr oss ikke om rekkefølgen og legger ikke tilbake → kombinasjon.',
+                f'Formel: $C(n, k) = \\dbinom{{n}}{{k}} = \\dfrac{{n!}}{{k!\\,(n-k)!}}$',
+                f'$C({n}, {k}) = \\dfrac{{{n}!}}{{{k}!\\cdot {n-k}!}} = {ans}$',
+            ]
+
+        else:  # unordered_replace
+            ans = math.comb(n + k - 1, k)
+            prompt = (
+                f'{bag_intro} '
+                f'Du trekker {k} kuler med tilbakelegging, '
+                'men vi bryr oss ikke om i hvilken rekkefølge de ble trukket. '
+                f'Hvor mange ulike utvalg av {k} kuler er mulig?'
+            )
+            steps = [
+                'Vi bryr oss ikke om rekkefølgen, men legger tilbake → kombinasjon med tilbakelegging.',
+                f'Formel: $C(n + k - 1,\\, k) = \\dbinom{{n+k-1}}{{k}}$',
+                f'$C({n}+{k}-1,\\, {k}) = C({n+k-1},\\, {k}) = {ans}$',
             ]
 
         return ProblemData(
@@ -70,7 +120,14 @@ class CombinatoricsProbabilityGenerator(BaseGenerator):
             correct_answer=ans,
             solution_short=f'Svar: {ans}',
             solution_steps=steps,
-            metadata={'tema': 'sannsynlighet', 'difficulty': 3, 'latex': False, 'subtype': subtype},
+            metadata={
+                'tema': 'sannsynlighet',
+                'difficulty': 3,
+                'latex': True,
+                'subtype': subtype,
+                'n': n,
+                'k': k,
+            },
             assets=[],
             seed=seed or rng.randint(1, 10**9),
         )

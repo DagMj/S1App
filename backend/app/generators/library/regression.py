@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import random
 
@@ -9,9 +9,8 @@ import numpy as np
 
 from app.generators.core.base import BaseGenerator
 from app.generators.core.types import EvalResult, GeneratorMeta, ProblemData
-from app.generators.library.common import default_solution
+from app.generators.library.common import default_evaluate, default_solution
 from app.services.asset_service import asset_service
-from app.services.evaluation_engine import evaluation_engine
 
 
 class RegressionGenerator(BaseGenerator):
@@ -19,10 +18,10 @@ class RegressionGenerator(BaseGenerator):
         return GeneratorMeta(
             key='regression',
             name='Lineær regresjon',
-            description='Lineær regresjon med tydelig verditabell og graf.',
+            description='Lineær regresjon – velg riktig stigningstall blant fem alternativer.',
             tema='Regresjon',
             part='del2',
-            answer_type='number',
+            answer_type='multiple_choice',
             difficulty=3,
             default_weight=0.8,
         )
@@ -47,6 +46,21 @@ class RegressionGenerator(BaseGenerator):
         est_slope = round(float(fit[0]), 2)
         est_intercept = round(float(fit[1]), 2)
 
+        # Build 5 options spaced 0.8 apart (well above the 0.4 minimum),
+        # with est_slope at position 2 (middle). Shift up if any option < 0.4.
+        deltas = [-1.6, -0.8, 0.0, 0.8, 1.6]
+        options = [round(est_slope + d, 2) for d in deltas]
+        if options[0] < 0.4:
+            shift = round(0.4 - options[0], 2)
+            options = [round(v + shift, 2) for v in options]
+        correct_idx = 2  # middle element is always the correct slope
+
+        order = list(range(5))
+        rng.shuffle(order)
+        letters = ['A', 'B', 'C', 'D', 'E']
+        choices = {letters[i]: f'{options[order[i]]:.2f}' for i in range(5)}
+        correct_letter = letters[order.index(correct_idx)]
+
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.scatter(x, y, color='#0B4F8C', s=45, label='Datapunkter', zorder=3)
         xs = np.linspace(min(x), max(x), 200)
@@ -63,48 +77,33 @@ class RegressionGenerator(BaseGenerator):
         prompt = (
             f'{self._format_table(x, y)}\n'
             'Bruk lineær regresjon på datasettet. '
-            'Oppgi stigningstallet a i modellen y = ax + b (to desimaler).'
+            'Hvilket alternativ gir best estimat for stigningstallet $a$ i modellen $y = ax + b$?'
         )
 
         return ProblemData(
             generator_key=self.metadata().key,
             part='del2',
             prompt=prompt,
-            answer_type='number',
-            correct_answer=est_slope,
-            solution_short=f'a ≈ {est_slope}, b ≈ {est_intercept}.',
+            answer_type='multiple_choice',
+            correct_answer=correct_letter,
+            solution_short=f'Alternativ {correct_letter}: $a \\approx {est_slope}$, $b \\approx {est_intercept}$.',
             solution_steps=[
                 'Kjør lineær regresjon på verditabellen.',
-                f'Regresjonslinjen blir omtrent y = {est_slope}x + {est_intercept}.',
-                f'Svar: a ≈ {est_slope}.',
+                f'Regresjonslinjen blir omtrent $y = {est_slope}x + {est_intercept}$.',
+                f'Stigningstallet er $a \\approx {est_slope}$, dvs. alternativ {correct_letter}.',
             ],
-            metadata={'tema': 'regresjon', 'difficulty': 3, 'latex': False},
+            metadata={
+                'tema': 'regresjon',
+                'difficulty': 3,
+                'latex': True,
+                'choices': choices,
+            },
             assets=[asset],
             seed=seed or rng.randint(1, 10**9),
         )
 
     def evaluate(self, answer: str, problem: ProblemData) -> EvalResult:
-        base = evaluation_engine.evaluate(answer, problem)
-        if base.is_correct:
-            return base
-
-        try:
-            user = float(answer.strip().replace(',', '.'))
-            expected = float(problem.correct_answer)
-            if abs(user - expected) <= 0.2:
-                return EvalResult(
-                    is_correct=True,
-                    score=problem.max_points,
-                    max_points=problem.max_points,
-                    confidence=0.9,
-                    uncertain=False,
-                    feedback='Riktig innenfor regresjonstoleranse.',
-                    normalized_answer=str(user),
-                    details={'layer': 'generator_specific', 'tolerance': 0.2},
-                )
-        except Exception:
-            pass
-        return base
+        return default_evaluate(answer, problem)
 
     def solution(self, problem: ProblemData) -> dict:
         return default_solution(problem)

@@ -46,8 +46,8 @@ class LinearEquationGenerator(BaseGenerator):
             )
             steps = [
                 step_1,
-                f'Da får vi {a}x = {c - b}.',
-                f'Del på {a}: x = {x}.',
+                f'Da får vi ${a}x = {c - b}$.',
+                f'Del på ${a}$: $x = {x}$.',
             ]
         else:
             x = rng.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
@@ -62,9 +62,9 @@ class LinearEquationGenerator(BaseGenerator):
 
             prompt = f'Løs likningen $$ {a}({_x_shift(b)}) = {c}({_x_shift(d)}) + {e} $$'
             steps = [
-                f'Utvid parentesene: {a}({_x_shift(b)}) = {c}({_x_shift(d)}) + {e}.',
-                'Flytt ledd med x til venstre og tall til høyre.',
-                f'Da får vi x = {x}.',
+                f'Utvid parentesene: ${a}({_x_shift(b)}) = {c}({_x_shift(d)}) + {e}$.',
+                'Flytt ledd med $x$ til venstre og tall til høyre.',
+                f'Da får vi $x = {x}$.',
             ]
 
         return ProblemData(
@@ -73,7 +73,7 @@ class LinearEquationGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=x,
-            solution_short=f'x = {x}',
+            solution_short=f'$x = {x}$',
             solution_steps=steps,
             metadata={'tema': 'likninger', 'difficulty': 2, 'latex': True, 'subtype': subtype},
             assets=[],
