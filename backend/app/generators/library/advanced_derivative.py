@@ -45,9 +45,10 @@ class AdvancedDerivativeGenerator(BaseGenerator):
             b = rng.choice([-3, -2, -1, 1, 2, 3])
             n = rng.choice([3, 4, 5])
             expr = (a * x + b) ** n
-            derivative = sp.expand(sp.diff(expr, x))
+            # Keep factored form — more readable and matches hand-written chain-rule answer
+            derivative = sp.diff(expr, x)
             steps = [
-                "Bruk kjerneregel: (g(x)^n)' = n g(x)^{n-1} g'(x).",
+                "Bruk kjerneregel: (g(x)^n)' = n·g(x)^{n-1}·g'(x).",
                 f'Her er g(x)={sp.latex(a * x + b)} og g\'(x)={a}.',
                 f'Da blir f\'(x)={sp.latex(derivative)}.',
             ]

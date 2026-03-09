@@ -50,8 +50,6 @@ class ModelVisualizationGenerator(BaseGenerator):
 
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
-        np.random.seed(rng.randint(1, 10**6))
-
         model = rng.choice(['A', 'B', 'C', 'D'])
         x = np.linspace(0, 6, 220)
         y, title = self._build_curve(model, x, rng)
@@ -63,6 +61,7 @@ class ModelVisualizationGenerator(BaseGenerator):
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         asset = asset_service.save_figure(fig, 'model_visual')
+        plt.close(fig)
 
         prompt = (
             'Hvilken modelltype passer grafen best?\n'

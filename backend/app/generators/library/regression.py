@@ -58,6 +58,7 @@ class RegressionGenerator(BaseGenerator):
         ax.set_ylabel('y')
         ax.set_title('Lineær regresjon')
         asset = asset_service.save_figure(fig, 'regression')
+        plt.close(fig)
 
         prompt = (
             f'{self._format_table(x, y)}\n'

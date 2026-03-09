@@ -43,6 +43,7 @@ class GraphInterpretationGenerator(BaseGenerator):
         ax.grid(alpha=0.25)
         ax.set_title('Graf for en andregradsfunksjon')
         asset = asset_service.save_figure(fig, 'graph_interp')
+        plt.close(fig)
 
         prompt = 'Les av nullpunktene til grafen. Oppgi løsningsmengden for f(x)=0.'
 
