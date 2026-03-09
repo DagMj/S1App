@@ -91,7 +91,7 @@ class AlgebraicFractionsGenerator(BaseGenerator):
     @staticmethod
     def _latex_ans(expr: sp.Expr) -> str:
         """Wrap a SymPy expression in display-math LaTeX delimiters."""
-        return f'$$\\displaystyle {sp.latex(expr)}$$'
+        return f'$${sp.latex(expr)}$$'
 
     # ── Numerator picker ──────────────────────────────────────────────────────
 
@@ -103,7 +103,7 @@ class AlgebraicFractionsGenerator(BaseGenerator):
         b=None → constant a
         b=int  → linear ax+b
         """
-        if allow_linear and rng.random() < 0.30:
+        if allow_linear and rng.random() < 0.45:
             a = rng.choice([1, 2])
             b = rng.choice([-3, -2, -1, 1, 2, 3])
             return a, b
@@ -120,8 +120,8 @@ class AlgebraicFractionsGenerator(BaseGenerator):
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
         x = sp.Symbol('x')
-        # Weight three_frac 2:1 since it's the richer subtype
-        subtype = rng.choices(['two_frac', 'three_frac'], weights=[1, 2])[0]
+        # Weight three_frac 3:1 — richer and more representative of exam problems
+        subtype = rng.choices(['two_frac', 'three_frac'], weights=[1, 3])[0]
         if subtype == 'two_frac':
             return self._gen_two_frac(rng, x, seed)
         return self._gen_three_frac(rng, x, seed)
@@ -133,7 +133,7 @@ class AlgebraicFractionsGenerator(BaseGenerator):
 
         # Optional extra integer factor outside one denominator (prob 30%)
         k1, k2 = 1, 1
-        if rng.random() < 0.30:
+        if rng.random() < 0.40:
             if rng.random() < 0.5:
                 k1 = rng.choice([2, 3])
             else:
@@ -195,7 +195,7 @@ class AlgebraicFractionsGenerator(BaseGenerator):
 
         # Optional extra factor on one simple denominator (prob 30%)
         k1, k2 = 1, 1
-        if rng.random() < 0.30:
+        if rng.random() < 0.40:
             if rng.random() < 0.5:
                 k1 = rng.choice([2, 3])
             else:
@@ -207,7 +207,7 @@ class AlgebraicFractionsGenerator(BaseGenerator):
         c = rng.choice([1, 2, 3, 4, 5, 6])
 
         # Sometimes write the product denominator as an expanded polynomial
-        expand_quad = rng.random() < 0.35
+        expand_quad = rng.random() < 0.45
 
         op1 = rng.choice(['+', '-'])
         op2 = rng.choice(['+', '-'])

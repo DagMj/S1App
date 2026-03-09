@@ -275,6 +275,28 @@ select {
   border: 1px solid #f1b3b3;
 }
 
+.solution-sketch {
+  margin-top: 0.5rem;
+}
+
+.solution-steps {
+  margin: 0.3rem 0 0.4rem 1.2rem;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.solution-steps li {
+  margin-bottom: 0.2rem;
+}
+
+.solution-steps li > div.math-text > p {
+  margin: 0;
+}
+
+.solution-answer > div.math-text > p {
+  margin: 0;
+}
+
 .row-actions {
   display: flex;
   gap: 0.7rem;
