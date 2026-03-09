@@ -7,7 +7,7 @@ export function ModesPage() {
       <div className="mode-cards">
         <Link to="/exam" className="mode-card">
           <h3>Eksamensmodus</h3>
-          <p>6 del 1 + 4 del 2 med vektet trekning uten tilbakelegging.</p>
+          <p>10 oppgaver med vektet trekning uten tilbakelegging.</p>
         </Link>
         <Link to="/training" className="mode-card">
           <h3>Trening: én generator</h3>

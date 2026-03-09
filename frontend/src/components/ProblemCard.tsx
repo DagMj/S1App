@@ -87,7 +87,6 @@ export function ProblemCard({
     setShowHint(false)
   }, [problem.session_item_id])
 
-  const partLabel = problem.part === 'del1' ? 'Del 1' : 'Del 2'
   const generatorLabel = problem.generator_name?.trim() || humanize(problem.generator_key)
   const answerTypeLabel = answerTypeLabels[problem.answer_type] ?? humanize(problem.answer_type)
   const hint = problem.hint?.trim()
@@ -126,7 +125,6 @@ export function ProblemCard({
     <section className="problem-card">
       <div className="problem-meta">
         <span>{generatorLabel}</span>
-        <span>{partLabel}</span>
         <span>{answerTypeLabel}</span>
       </div>
       <MathText text={problem.prompt} />

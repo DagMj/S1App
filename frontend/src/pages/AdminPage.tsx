@@ -44,7 +44,6 @@ export function AdminPage() {
         <thead>
           <tr>
             <th>Nøkkel</th>
-            <th>Del</th>
             <th>Vekt</th>
             <th>Aktiv</th>
             <th>Handling</th>
@@ -54,18 +53,6 @@ export function AdminPage() {
           {rows.map((row) => (
             <tr key={row.key}>
               <td>{row.key}</td>
-              <td>
-                <select
-                  value={row.part}
-                  onChange={async (e) => {
-                    await adminUpdateGenerator(row.key, { part: e.target.value as 'del1' | 'del2' })
-                    await load()
-                  }}
-                >
-                  <option value="del1">del1</option>
-                  <option value="del2">del2</option>
-                </select>
-              </td>
               <td>
                 <input
                   type="number"
