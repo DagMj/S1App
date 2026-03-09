@@ -22,12 +22,23 @@ class PowerRulesGenerator(BaseGenerator):
 
     @staticmethod
     def _format_answer(exp_a: int, exp_b: int) -> str:
+        """Python/sympy-compatible string used as correct_answer for evaluation."""
         factors: list[str] = []
         if exp_a > 0:
             factors.append('a' if exp_a == 1 else f'a**{exp_a}')
         if exp_b > 0:
             factors.append('b' if exp_b == 1 else f'b**{exp_b}')
         return '*'.join(factors) if factors else '1'
+
+    @staticmethod
+    def _format_latex(exp_a: int, exp_b: int) -> str:
+        """LaTeX string used in solution steps and solution_short."""
+        parts: list[str] = []
+        if exp_a > 0:
+            parts.append('a' if exp_a == 1 else f'a^{{{exp_a}}}')
+        if exp_b > 0:
+            parts.append('b' if exp_b == 1 else f'b^{{{exp_b}}}')
+        return ''.join(parts) if parts else '1'
 
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
@@ -44,11 +55,12 @@ class PowerRulesGenerator(BaseGenerator):
 
             prompt = f'Forenkle uttrykket $$\\frac{{a^{{{a_top}}}b^{{{b_top}}}}}{{a^{{{a_bottom}}}b^{{{b_bottom}}}}}$$'
             answer = self._format_answer(exp_a, exp_b)
+            ans_latex = self._format_latex(exp_a, exp_b)
             steps = [
-                'Bruk regelen $a^m/a^n=a^{m-n}$ på hver variabel.',
-                f'For $a$: $a^{{{a_top}}}/a^{{{a_bottom}}}=a^{{{exp_a}}}$.',
-                f'For $b$: $b^{{{b_top}}}/b^{{{b_bottom}}}=b^{{{exp_b}}}$.',
-                f'Svar: ${answer}$.',
+                'Bruk regelen $a^m / a^n = a^{m-n}$ på hver variabel.',
+                f'For $a$: $a^{{{a_top}}} / a^{{{a_bottom}}} = a^{{{exp_a}}}$.',
+                f'For $b$: $b^{{{b_top}}} / b^{{{b_bottom}}} = b^{{{exp_b}}}$.',
+                f'Svar: ${ans_latex}$.',
             ]
 
         elif subtype == 'nested':
@@ -66,11 +78,12 @@ class PowerRulesGenerator(BaseGenerator):
                 f'Forenkle uttrykket $$\\frac{{(a^{{{p}}}b^{{{q}}})^{{{k}}}}}{{a^{{{r}}}b^{{{s}}}}}$$'
             )
             answer = self._format_answer(exp_a, exp_b)
+            ans_latex = self._format_latex(exp_a, exp_b)
             steps = [
-                'Bruk regelen $(xy)^n=x^ny^n$ og $(x^m)^n=x^{mn}$.',
-                f'Telleren blir $a^{{{p * k}}}b^{{{q * k}}}$.',
-                f'Trekk fra eksponentene i nevneren: $a^{{{p * k}-{r}}}b^{{{q * k}-{s}}}=a^{{{exp_a}}}b^{{{exp_b}}}$.',
-                f'Svar: ${answer}$.',
+                'Bruk reglene $(xy)^n = x^n y^n$ og $(x^m)^n = x^{mn}$.',
+                f'Telleren blir $a^{{{p * k}}} b^{{{q * k}}}$.',
+                f'Trekk fra eksponentene i nevneren: $a^{{{p * k}-{r}}} b^{{{q * k}-{s}}} = a^{{{exp_a}}} b^{{{exp_b}}}$.',
+                f'Svar: ${ans_latex}$.',
             ]
 
         else:
@@ -82,16 +95,17 @@ class PowerRulesGenerator(BaseGenerator):
             exp_a = root_a - reduce_a
             exp_b = root_b - reduce_b
             answer = self._format_answer(exp_a, exp_b)
+            ans_latex = self._format_latex(exp_a, exp_b)
 
             prompt = (
                 'Anta at $a>0$ og $b>0$. '
                 f'Forenkle uttrykket $$\\frac{{\\sqrt{{a^{{{2 * root_a}}}b^{{{2 * root_b}}}}}}}{{a^{{{reduce_a}}}b^{{{reduce_b}}}}}$$'
             )
             steps = [
-                'Bruk regelen $\\sqrt{a^{2n}}=a^n$ når $a>0$.',
-                f'Nevneren i roten gir $\\sqrt{{a^{{{2 * root_a}}}b^{{{2 * root_b}}}}}=a^{{{root_a}}}b^{{{root_b}}}$.',
-                f'Deretter $a^{{{root_a}}}/a^{{{reduce_a}}}=a^{{{exp_a}}}$ og $b^{{{root_b}}}/b^{{{reduce_b}}}=b^{{{exp_b}}}$.',
-                f'Svar: ${answer}$.',
+                r'Bruk regelen $\sqrt{a^{2n}} = a^n$ når $a > 0$.',
+                f'Roten gir $\\sqrt{{a^{{{2 * root_a}}}b^{{{2 * root_b}}}}} = a^{{{root_a}}}b^{{{root_b}}}$.',
+                f'Deretter $a^{{{root_a}}} / a^{{{reduce_a}}} = a^{{{exp_a}}}$ og $b^{{{root_b}}} / b^{{{reduce_b}}} = b^{{{exp_b}}}$.',
+                f'Svar: ${ans_latex}$.',
             ]
 
         return ProblemData(
@@ -100,7 +114,7 @@ class PowerRulesGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='expression',
             correct_answer=answer,
-            solution_short=f'Svar: {answer}.',
+            solution_short=f'Svar: ${ans_latex}$.',
             solution_steps=steps,
             metadata={'tema': 'potensregning', 'difficulty': 3, 'latex': True, 'subtype': subtype},
             assets=[],
