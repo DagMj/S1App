@@ -185,8 +185,17 @@ export function ProblemCard({
         <div className={`feedback ${feedback.is_correct ? 'ok' : 'bad'}`}>
           <p>{feedback.feedback}</p>
           <p>Poeng: {feedback.score}/{feedback.max_points}</p>
-          <p>Sikkerhet: {feedback.confidence.toFixed(2)} {feedback.uncertain ? '(usikker)' : ''}</p>
-          <p>Løsningsskisse: {feedback.solution_short}</p>
+          <div className="solution-sketch">
+            <strong>Løsningsskisse:</strong>
+            {feedback.solution_steps && feedback.solution_steps.length > 0 && (
+              <ol className="solution-steps">
+                {feedback.solution_steps.map((step, i) => (
+                  <li key={i}><MathText text={step} /></li>
+                ))}
+              </ol>
+            )}
+            <div className="solution-answer"><MathText text={feedback.solution_short} /></div>
+          </div>
           {isLocked && <p>Oppgaven er allerede levert i denne eksamensøkten.</p>}
         </div>
       )}

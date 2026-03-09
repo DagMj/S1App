@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react'
 
+import { MathText } from '../components/MathText'
 import {
   GeneratorConfig,
   adminListGenerators,
@@ -115,7 +116,17 @@ export function AdminPage() {
           {sample.assets.map((asset) => (
             <img key={asset} src={toAssetUrl(asset)} alt="Eksempelfigur" className="problem-asset" />
           ))}
-          <p><strong>Løsning:</strong> {sample.solution_short}</p>
+          <div className="solution-sketch">
+            <strong>Løsning:</strong>
+            {sample.solution_steps && sample.solution_steps.length > 0 && (
+              <ol className="solution-steps">
+                {sample.solution_steps.map((step: string, i: number) => (
+                  <li key={i}><MathText text={step} /></li>
+                ))}
+              </ol>
+            )}
+            <div className="solution-answer"><MathText text={sample.solution_short} /></div>
+          </div>
         </article>
       )}
     </section>
