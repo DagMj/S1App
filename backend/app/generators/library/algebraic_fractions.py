@@ -56,6 +56,13 @@ class AlgebraicFractionsGenerator(BaseGenerator):
         return f'{coeff}x-{abs(b)}'
 
     @staticmethod
+    def _negate_num_str(num_str: str, is_const: bool) -> str:
+        """Return LaTeX for the negation of a numerator string."""
+        if is_const:
+            return f'-{num_str}'
+        return f'-({num_str})'
+
+    @staticmethod
     def _sympy_num(a: int, b: Optional[int], x: sp.Symbol) -> sp.Expr:
         return sp.Integer(a) if b is None else a * x + b
 
@@ -172,8 +179,10 @@ class AlgebraicFractionsGenerator(BaseGenerator):
         # LaTeX prompt — randomly swap display order for + (can't swap - without sign change)
         lat_d1 = self._latex_simple_denom(k1, p)
         lat_d2 = self._latex_simple_denom(k2, q)
-        f1 = f'\\frac{{{self._latex_num(na, nb)}}}{{{lat_d1}}}'
-        f2 = f'\\frac{{{self._latex_num(ca, cb)}}}{{{lat_d2}}}'
+        num1_str = self._latex_num(na, nb)
+        num2_str = self._latex_num(ca, cb)
+        f1 = f'\\frac{{{num1_str}}}{{{lat_d1}}}'
+        f2 = f'\\frac{{{num2_str}}}{{{lat_d2}}}'
 
         if op == '+' and rng.random() < 0.5:
             display = f'{f2}+{f1}'
@@ -187,6 +196,15 @@ class AlgebraicFractionsGenerator(BaseGenerator):
         fp, fq = self._fmt_shift(p), self._fmt_shift(q)
         lcd = f'$({fp})({fq})$' if k_lcm == 1 else f'${k_lcm}({fp})({fq})$'
 
+        # Intermediate step: combined fraction before final simplification
+        combined_frac = sp.together(expr)
+        numer_combined, denom_combined = sp.fraction(combined_frac)
+        numer_exp_lat = sp.latex(sp.expand(numer_combined))
+        denom_lat = sp.latex(sp.factor(denom_combined))
+        intermediate_step = (
+            f'Felles nevner gir: $\\dfrac{{{numer_exp_lat}}}{{{denom_lat}}}$'
+        )
+
         ans_lat = self._latex_ans(simplified)
         return ProblemData(
             generator_key=self.metadata().key,
@@ -197,7 +215,7 @@ class AlgebraicFractionsGenerator(BaseGenerator):
             solution_short=ans_lat,
             solution_steps=[
                 f'Fellesnevner er {lcd}.',
-                'Utvid begge brøkene til fellesnevner og regn ut telleren.',
+                intermediate_step,
                 f'Forkortet svar: {ans_lat}',
             ],
             metadata={'tema': 'algebra', 'difficulty': 3, 'latex': True, 'subtype': 'two_frac'},
@@ -246,23 +264,44 @@ class AlgebraicFractionsGenerator(BaseGenerator):
         lat_d2 = self._latex_simple_denom(k2, q)
         lat_dprod = self._latex_product_denom(p, q, expand=expand_quad)
 
+        num1_str = self._latex_num(na, nb)
+        num2_str = self._latex_num(ca, cb)
+
         fracs = [
             {
-                'lat': f'\\frac{{{self._latex_num(na, nb)}}}{{{lat_d1}}}',
+                'num': num1_str,
+                'denom': lat_d1,
+                'lat': f'\\frac{{{num1_str}}}{{{lat_d1}}}',
                 'neg': False,
+                'is_const': (nb is None),
             },
             {
-                'lat': f'\\frac{{{self._latex_num(ca, cb)}}}{{{lat_d2}}}',
+                'num': num2_str,
+                'denom': lat_d2,
+                'lat': f'\\frac{{{num2_str}}}{{{lat_d2}}}',
                 'neg': (op1 == '-'),
+                'is_const': (cb is None),
             },
             {
+                'num': str(c),
+                'denom': lat_dprod,
                 'lat': f'\\frac{{{c}}}{{{lat_dprod}}}',
                 'neg': (op2 == '-'),
+                'is_const': True,
             },
         ]
 
         # Shuffle position of all three fractions randomly
         rng.shuffle(fracs)
+
+        # For the first fraction: if negative, randomly put minus in numerator
+        if fracs[0]['neg'] and rng.random() < 0.5:
+            neg_num = self._negate_num_str(fracs[0]['num'], fracs[0]['is_const'])
+            fracs[0] = {
+                **fracs[0],
+                'lat': f'\\frac{{{neg_num}}}{{{fracs[0]["denom"]}}}',
+                'neg': False,
+            }
 
         # Build the display expression
         parts: list[str] = []
@@ -286,7 +325,15 @@ class AlgebraicFractionsGenerator(BaseGenerator):
             steps.append(
                 f'Nevneren ${expanded_str}$ faktoriserer til ${factored_str}$.'
             )
-        steps.append('Utvid brøkene til fellesnevner og regn ut telleren.')
+
+        # Intermediate step: combined fraction before final simplification
+        combined_frac = sp.together(expr)
+        numer_combined, denom_combined = sp.fraction(combined_frac)
+        numer_exp_lat = sp.latex(sp.expand(numer_combined))
+        denom_lat = sp.latex(sp.factor(denom_combined))
+        steps.append(
+            f'Felles nevner gir: $\\dfrac{{{numer_exp_lat}}}{{{denom_lat}}}$'
+        )
 
         ans_lat = self._latex_ans(simplified)
         steps.append(f'Forkortet svar: {ans_lat}')
