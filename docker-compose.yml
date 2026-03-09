@@ -14,6 +14,7 @@
     build:
       context: ./backend
     environment:
+      PORT: 8000
       DATABASE_URL: postgresql+psycopg://s1:s1@db:5432/s1
       JWT_SECRET_KEY: change-me-in-production
       CORS_ORIGINS: http://localhost:5173
