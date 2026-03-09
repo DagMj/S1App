@@ -55,8 +55,9 @@ class PowerRulesGenerator(BaseGenerator):
             p = rng.choice([2, 3, 4])
             q = rng.choice([1, 2, 3])
             k = rng.choice([2, 3])
-            r = rng.choice([2, 3, 4, 5])
-            s = rng.choice([1, 2, 3])
+            # Clamp r and s so exponents stay positive (avoid silently dropping factors)
+            r = rng.randint(1, p * k - 1)
+            s = rng.randint(1, q * k - 1)
 
             exp_a = p * k - r
             exp_b = q * k - s
