@@ -111,7 +111,7 @@ export function TrainingPage() {
                   />
                   <div>
                     <strong>{g.name}</strong>
-                    <p>{g.tema} - {g.part}</p>
+                    <p>{g.tema}</p>
                   </div>
                 </label>
               )
