@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { MathText } from '../components/MathText'
 import {
@@ -9,7 +9,6 @@ import {
   adminUpdateGenerator,
   toAssetUrl,
 } from '../services/api'
-import { MathText } from '../components/MathText'
 
 export function AdminPage() {
   const [rows, setRows] = useState<GeneratorConfig[]>([])
@@ -20,6 +19,7 @@ export function AdminPage() {
     prompt: string
     assets: string[]
     solution_short: string
+    solution_steps: string[]
   } | null>(null)
 
   async function load() {
@@ -87,6 +87,7 @@ export function AdminPage() {
                         prompt: s.prompt,
                         assets: s.assets,
                         solution_short: s.solution_short,
+                        solution_steps: s.solution_steps,
                       })
                     }}
                   >
@@ -118,9 +119,9 @@ export function AdminPage() {
           ))}
           <div className="solution-sketch">
             <strong>Løsning:</strong>
-            {sample.solution_steps && sample.solution_steps.length > 0 && (
+            {sample.solution_steps.length > 0 && (
               <ol className="solution-steps">
-                {sample.solution_steps.map((step: string, i: number) => (
+                {sample.solution_steps.map((step, i) => (
                   <li key={i}><MathText text={step} /></li>
                 ))}
               </ol>
