@@ -22,8 +22,6 @@ export function DashboardPage() {
             <div><strong>{overview.solved_total}</strong><span>Løst</span></div>
             <div><strong>{overview.correct_total}</strong><span>Riktige</span></div>
             <div><strong>{(overview.accuracy * 100).toFixed(1)}%</strong><span>Treffsikkerhet</span></div>
-            <div><strong>{overview.del1_solved}</strong><span>Del 1</span></div>
-            <div><strong>{overview.del2_solved}</strong><span>Del 2</span></div>
           </div>
         )}
       </article>

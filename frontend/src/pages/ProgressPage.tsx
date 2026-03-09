@@ -15,8 +15,6 @@ export function ProgressPage() {
     solved_total: number
     correct_total: number
     accuracy: number
-    del1_solved: number
-    del2_solved: number
   } | null>(null)
   const [perGenerator, setPerGenerator] = useState<
     Array<{ generator_key: string; solved: number; correct: number; accuracy: number }>
