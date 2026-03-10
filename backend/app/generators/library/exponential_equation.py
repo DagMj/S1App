@@ -169,7 +169,7 @@ class ExponentialEquationGenerator(BaseGenerator):
                 )
 
             if answer_type == 'solution_set':
-                solution_short = f'Løsningsmengde: {{{x1}, {x2}}}'
+                solution_short = f'Løsningsmengde: $\\{{{x1}, {x2}\\}}$'
             else:
                 solution_short = f'$x = {correct_answer}$'
 

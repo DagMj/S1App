@@ -35,8 +35,8 @@ class RegressionGenerator(BaseGenerator):
 
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
-        slope = rng.choice([1.4, 1.8, 2.2, 2.6])
-        intercept = rng.choice([1.5, 2.0, 2.5, 3.0])
+        slope = rng.choice([1.4, 1.8, 2.2, 2.6, -1.4, -1.8, -2.2, -2.6])
+        intercept = rng.choice([1.5, 2.0, 2.5, 3.0, 8.0, 10.0, 12.0])
 
         x = np.array([1, 2, 3, 4, 5, 6, 7, 8], dtype=float)
         noise = np.array([rng.choice([-0.2, -0.1, 0.0, 0.1, 0.2]) for _ in x])
@@ -46,13 +46,9 @@ class RegressionGenerator(BaseGenerator):
         est_slope = round(float(fit[0]), 2)
         est_intercept = round(float(fit[1]), 2)
 
-        # Build 5 options spaced 0.8 apart (well above the 0.4 minimum),
-        # with est_slope at position 2 (middle). Shift up if any option < 0.4.
+        # Build 5 options spaced 0.8 apart, with est_slope at position 2 (middle).
         deltas = [-1.6, -0.8, 0.0, 0.8, 1.6]
         options = [round(est_slope + d, 2) for d in deltas]
-        if options[0] < 0.4:
-            shift = round(0.4 - options[0], 2)
-            options = [round(v + shift, 2) for v in options]
         correct_idx = 2  # middle element is always the correct slope
 
         order = list(range(5))

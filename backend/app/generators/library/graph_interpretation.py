@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import random
 
@@ -59,7 +59,7 @@ class GraphInterpretationGenerator(BaseGenerator):
                 f'Grafen krysser ved $x={r1}$ og $x={r2}$.',
                 f'Svar: $\\{{{r1}, {r2}\\}}$.',
             ],
-            metadata={'tema': 'graf', 'difficulty': 3, 'latex': False},
+            metadata={'tema': 'graf', 'difficulty': 3, 'latex': True},
             assets=[asset],
             seed=seed or rng.randint(1, 10**9),
         )
