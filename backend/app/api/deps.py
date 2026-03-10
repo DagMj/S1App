@@ -21,4 +21,14 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Bruker ikke funnet')
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Bruker er deaktivert')
+
+    if settings.test_mode and user.email != settings.test_user_email:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                'Appen er i testmodus. '
+                'Kun testbrukeren har tilgang til denne funksjonen.'
+            ),
+        )
+
     return user
