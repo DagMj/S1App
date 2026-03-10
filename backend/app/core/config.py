@@ -34,10 +34,10 @@ class Settings(BaseSettings):
 
     ai_fallback_enabled: bool = True
 
-    # Testmodus: naar True kan kun brukeren med e-post test@test.no bruke appen.
+    # Testmodus: naar True kan kun brukeren med e-post 'test' bruke appen.
     # Sett TEST_MODE=true i .env for aa sperre alle unntatt testbrukeren.
     test_mode: bool = False
-    test_user_email: str = 'test@test.no'
+    test_user_email: str = 'test'
 
 
 @lru_cache

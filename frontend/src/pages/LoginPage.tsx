@@ -36,7 +36,7 @@ export function LoginPage() {
         {isRegister && (
           <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Fullt navn" />
         )}
-        <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="E-post" />
+        <input value={email} onChange={(e) => setEmail(e.target.value)} type={isRegister ? 'email' : 'text'} placeholder="E-post" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Passord" />
         <button className="btn" type="submit" disabled={busy}>
           {busy ? 'Jobber...' : isRegister ? 'Registrer og logg inn' : 'Logg inn'}
