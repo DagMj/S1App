@@ -34,6 +34,12 @@ class Settings(BaseSettings):
 
     ai_fallback_enabled: bool = True
 
+    # Sett disse i .env for å opprette en admin-bruker automatisk ved oppstart.
+    # Eksisterende bruker oppgraderes til admin hvis e-posten finnes allerede.
+    seed_admin_email: str | None = None
+    seed_admin_password: str | None = None
+    seed_admin_full_name: str = 'Administrator'
+
 
 @lru_cache
 def get_settings() -> Settings:

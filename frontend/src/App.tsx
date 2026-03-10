@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './components/AppLayout'
+import { RequireAdmin } from './components/RequireAdmin'
 import { RequireAuth } from './components/RequireAuth'
 import { AdminPage } from './pages/AdminPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -78,9 +79,9 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <RequireAuth>
+            <RequireAdmin>
               <AdminPage />
-            </RequireAuth>
+            </RequireAdmin>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

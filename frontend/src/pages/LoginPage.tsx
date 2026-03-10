@@ -1,7 +1,7 @@
 ﻿import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { login, register } from '../services/api'
+import { getMe, login, register, saveIsAdmin } from '../services/api'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -21,6 +21,8 @@ export function LoginPage() {
         await register(email, fullName, password)
       }
       await login(email, password)
+      const me = await getMe()
+      saveIsAdmin(me.is_admin)
       navigate('/dashboard')
     } catch (err) {
       setError((err as Error).message)
