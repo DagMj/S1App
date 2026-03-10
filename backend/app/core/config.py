@@ -1,4 +1,4 @@
-from functools import lru_cache
+﻿from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -33,11 +33,6 @@ class Settings(BaseSettings):
     assets_public_base_url: str | None = None
 
     ai_fallback_enabled: bool = True
-
-    # Testmodus: naar True kan kun brukeren med e-post 'test' bruke appen.
-    # Sett TEST_MODE=true i .env for aa sperre alle unntatt testbrukeren.
-    test_mode: bool = False
-    test_user_email: str = 'test'
 
 
 @lru_cache
