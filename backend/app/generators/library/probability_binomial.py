@@ -35,7 +35,7 @@ class ProbabilityBinomialGenerator(BaseGenerator):
     def generate(self, seed: int) -> ProblemData:
         rng = random.Random(seed)
         subtype = rng.choices(
-            ['coin', 'die', 'freeThrow', 'multipleChoice', 'medicine'],
+            ['coin', 'die', 'free_throw', 'multiple_choice', 'medicine'],
             weights=[20, 20, 20, 20, 20],
         )[0]
 
@@ -43,9 +43,9 @@ class ProbabilityBinomialGenerator(BaseGenerator):
             return self._coin(rng, seed)
         elif subtype == 'die':
             return self._die(rng, seed)
-        elif subtype == 'freeThrow':
+        elif subtype == 'free_throw':
             return self._free_throw(rng, seed)
-        elif subtype == 'multipleChoice':
+        elif subtype == 'multiple_choice':
             return self._multiple_choice(rng, seed)
         else:
             return self._medicine(rng, seed)
@@ -59,7 +59,6 @@ class ProbabilityBinomialGenerator(BaseGenerator):
         n: int,
         k: int,
         p: Fraction,
-        context_name: str,
         question_type: str,  # 'exactly', 'at_least', 'at_most'
         extra_steps: list[str] | None = None,
     ) -> ProblemData:
@@ -90,7 +89,7 @@ class ProbabilityBinomialGenerator(BaseGenerator):
             for i in range(k):
                 pi = _binom_prob(n, i, p)
                 steps.append(
-                    rf'$P(X={i}) = \binom{{{n}}}{{{i}}} \cdot {_frac_latex(p)}^{i} \cdot {_frac_latex(q)}^{{{n-i}}} = {_frac_latex(pi)}$'
+                    rf'$P(X={i}) = \binom{{{n}}}{{{i}}} \cdot {_frac_latex(p)}^{{{i}}} \cdot {_frac_latex(q)}^{{{n-i}}} = {_frac_latex(pi)}$'
                 )
             steps.append(f'$P(X \\leq {k-1}) = {_frac_latex(complement)}$')
             steps.append(f'$P(X \\geq {k}) = 1 - {_frac_latex(complement)} = {_frac_latex(prob)}$')
@@ -105,7 +104,7 @@ class ProbabilityBinomialGenerator(BaseGenerator):
             for i in range(k + 1):
                 pi = _binom_prob(n, i, p)
                 steps.append(
-                    rf'$P(X={i}) = \binom{{{n}}}{{{i}}} \cdot {_frac_latex(p)}^{i} \cdot {_frac_latex(q)}^{{{n-i}}} = {_frac_latex(pi)}$'
+                    rf'$P(X={i}) = \binom{{{n}}}{{{i}}} \cdot {_frac_latex(p)}^{{{i}}} \cdot {_frac_latex(q)}^{{{n-i}}} = {_frac_latex(pi)}$'
                 )
             steps.append(f'$P(X \\leq {k}) = {_frac_latex(prob)}$')
             short = f'$P(X \\leq {k}) = {_frac_latex(prob)}$'
@@ -148,7 +147,7 @@ class ProbabilityBinomialGenerator(BaseGenerator):
                 f'Hva er sannsynligheten for å få høyst {k} kron?'
             )
 
-        return self._build_problem(seed, prompt, n, k, p, 'mynt', q_type)
+        return self._build_problem(seed, prompt, n, k, p, q_type)
 
     # ── die ───────────────────────────────────────────────────────────────────
 
@@ -170,38 +169,36 @@ class ProbabilityBinomialGenerator(BaseGenerator):
                 f'Hva er sannsynligheten for å få {target}-er minst {k} gang{"er" if k > 1 else ""}?'
             )
 
-        return self._build_problem(seed, prompt, n, k, p, 'terning', q_type)
+        return self._build_problem(seed, prompt, n, k, p, q_type)
 
     # ── free throw ────────────────────────────────────────────────────────────
 
     def _free_throw(self, rng: random.Random, seed: int) -> ProblemData:
-        sport = rng.choice([
-            ('basketballspiller', 'frikastvinger', 'frikast'),
-            ('håndballspiller', 'straffekast', 'straffekast'),
-            ('fotballspiller', 'straffespark', 'straffespark'),
+        context, action = rng.choice([
+            ('basketballspiller', 'frikast'),
+            ('håndballspiller', 'straffekast'),
+            ('fotballspiller', 'straffespark'),
         ])
         name = rng.choice(['Ola', 'Kari', 'Jonas', 'Emma', 'Lars'])
-        p_num = rng.choice([3, 4])
-        p = Fraction(p_num, 5)  # 60% or 80%
+        p = Fraction(rng.choice([3, 4]), 5)  # 60% or 80%
         n = rng.randint(4, 7)
         k = rng.randint(2, min(4, n - 1))
         q_type = rng.choice(['exactly', 'at_least'])
-        context, action_pl, action_sg = sport
 
         if q_type == 'exactly':
             prompt = (
-                f'{name} er en dyktig {context} som scorer på {_frac_latex(p)} av sine {action_pl}.\n'
-                f'{name} tar {n} {action_pl}.\n'
+                f'{name} er en dyktig {context} som scorer på {_frac_latex(p)} av sine {action}.\n'
+                f'{name} tar {n} {action}.\n'
                 f'Hva er sannsynligheten for å score nøyaktig {k} ganger?'
             )
         else:
             prompt = (
-                f'{name} er en dyktig {context} som scorer på {_frac_latex(p)} av sine {action_pl}.\n'
-                f'{name} tar {n} {action_pl}.\n'
+                f'{name} er en dyktig {context} som scorer på {_frac_latex(p)} av sine {action}.\n'
+                f'{name} tar {n} {action}.\n'
                 f'Hva er sannsynligheten for å score minst {k} ganger?'
             )
 
-        return self._build_problem(seed, prompt, n, k, p, context, q_type)
+        return self._build_problem(seed, prompt, n, k, p, q_type)
 
     # ── multiple choice ───────────────────────────────────────────────────────
 
@@ -226,7 +223,7 @@ class ProbabilityBinomialGenerator(BaseGenerator):
             )
 
         extra = [f'Sannsynligheten for riktig svar på ett spørsmål: $p = {_frac_latex(p)}$.']
-        return self._build_problem(seed, prompt, n, k, p, 'flervalg', q_type, extra)
+        return self._build_problem(seed, prompt, n, k, p, q_type, extra)
 
     # ── medicine / defect ─────────────────────────────────────────────────────
 
@@ -272,7 +269,7 @@ class ProbabilityBinomialGenerator(BaseGenerator):
             )
 
         extra = [f'$p = {_frac_latex(p)}$ ({pct}%), $n = {n}$, binomisk fordeling.']
-        return self._build_problem(seed, prompt, n, k, p, actor, q_type, extra)
+        return self._build_problem(seed, prompt, n, k, p, q_type, extra)
 
     def evaluate(self, problem: ProblemData, user_answer: str) -> EvalResult:
         return default_evaluate(problem, user_answer)

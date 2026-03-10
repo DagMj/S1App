@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 from fractions import Fraction
+from math import comb
 
 from app.generators.core.base import BaseGenerator
 from app.generators.core.types import EvalResult, GeneratorMeta, ProblemData
@@ -61,7 +62,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Gunstige utfall: {{{target}}} → 1 utfall.',
                 f'$P = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         elif variant == 'leq':
             k = rng.randint(2, die_sides - 1)
@@ -75,7 +75,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Totalt: {die_sides} utfall.',
                 f'$P = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         elif variant == 'geq':
             k = rng.randint(2, die_sides - 1)
@@ -90,7 +89,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Totalt: {die_sides} utfall.',
                 f'$P = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         elif variant == 'even':
             fav = die_sides // 2
@@ -104,7 +102,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Totalt: {die_sides} utfall.',
                 f'$P(\\text{{partall}}) = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         else:  # odd
             fav = (die_sides + 1) // 2
@@ -118,7 +115,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Totalt: {die_sides} utfall.',
                 f'$P(\\text{{oddetall}}) = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         return ProblemData(
             generator_key='probability_classical',
@@ -126,7 +122,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=round(float(prob), 6),
-            solution_short=short,
+            solution_short=f'$P = {_frac_latex(prob)}$',
             solution_steps=steps,
             seed=seed,
         )
@@ -138,12 +134,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
 
         if variant == 'exact_sum':
             target = rng.randint(4, 10)
-            fav = sum(
-                1
-                for a in range(1, 7)
-                for b in range(1, 7)
-                if a + b == target
-            )
+            fav = sum(1 for a in range(1, 7) for b in range(1, 7) if a + b == target)
             prob = Fraction(fav, 36)
             prompt = (
                 f'Du kaster to vanlige terninger.\n'
@@ -154,16 +145,10 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Gunstige summer lik {target}: {fav} utfall.',
                 f'$P(\\text{{sum}} = {target}) = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         elif variant == 'sum_geq':
             k = rng.randint(9, 11)
-            fav = sum(
-                1
-                for a in range(1, 7)
-                for b in range(1, 7)
-                if a + b >= k
-            )
+            fav = sum(1 for a in range(1, 7) for b in range(1, 7) if a + b >= k)
             prob = Fraction(fav, 36)
             prompt = (
                 f'Du kaster to vanlige terninger.\n'
@@ -171,13 +156,12 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             )
             steps = [
                 f'Totalt: 36 utfall.',
-                f'Utfall med sum ≥ {k}: {fav} stykker.',
+                f'Utfall med sum $\\geq {k}$: {fav} stykker.',
                 f'$P(\\text{{sum}} \\geq {k}) = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         elif variant == 'both_same':
-            prob = Fraction(6, 36)
+            prob = Fraction(1, 6)
             prompt = (
                 'Du kaster to vanlige terninger.\n'
                 'Hva er sannsynligheten for at begge terningene viser det samme tallet?'
@@ -185,24 +169,21 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             steps = [
                 'Gunstige utfall: (1,1),(2,2),(3,3),(4,4),(5,5),(6,6) → 6 utfall.',
                 'Totalt: 36 utfall.',
-                f'$P(\\text{{like}}) = {_frac_latex(prob)} = {_frac_latex(prob)}$',
+                f'$P(\\text{{like}}) = {_frac_latex(Fraction(6,36))} = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         else:  # at_least_one
             k = rng.randint(1, 4)
-            none_fav = (6 - 1) ** 2  # neither shows k: 5*5=25
-            prob = Fraction(36 - none_fav, 36)
+            prob = Fraction(11, 36)
             prompt = (
                 f'Du kaster to vanlige terninger.\n'
                 f'Hva er sannsynligheten for at minst én av terningene viser {k}?'
             )
             steps = [
                 f'Komplementet: ingen terning viser {k}.',
-                f'$P(\\text{{ingen {k}}}) = {_frac_latex(Fraction(5,6))}^2 = {_frac_latex(Fraction(25,36))}$',
+                rf'$P(\text{{ingen}}) = \dfrac{{5}}{{6}}^2 = {_frac_latex(Fraction(25,36))}$',
                 f'$P(\\text{{minst én {k}}}) = 1 - {_frac_latex(Fraction(25,36))} = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         return ProblemData(
             generator_key='probability_classical',
@@ -210,7 +191,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=round(float(prob), 6),
-            solution_short=short,
+            solution_short=f'$P = {_frac_latex(prob)}$',
             solution_steps=steps,
             seed=seed,
         )
@@ -221,8 +202,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
         n_coins = rng.choice([2, 3, 4])
         total = 2 ** n_coins
         variant = rng.choice(['exactly_k', 'at_least_k', 'all_heads'])
-
-        from math import comb
 
         if variant == 'exactly_k':
             k = rng.randint(1, n_coins - 1)
@@ -237,7 +216,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 rf'Antall måter å velge {k} av {n_coins}: $\binom{{{n_coins}}}{{{k}}} = {fav}$.',
                 f'$P = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         elif variant == 'at_least_k':
             k = rng.randint(1, n_coins - 1)
@@ -249,10 +227,9 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             )
             steps = [
                 f'Totalt: {total} utfall.',
-                f'Gunstige (≥ {k} kron): {fav} utfall.',
+                f'Gunstige ($\\geq {k}$ kron): {fav} utfall.',
                 f'$P = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         else:  # all_heads
             prob = Fraction(1, total)
@@ -265,7 +242,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Gunstig utfall: kun 1 (alle kron).',
                 f'$P = {_frac_latex(prob)}$',
             ]
-            short = f'$P = {_frac_latex(prob)}$'
 
         return ProblemData(
             generator_key='probability_classical',
@@ -273,7 +249,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=round(float(prob), 6),
-            solution_short=short,
+            solution_short=f'$P = {_frac_latex(prob)}$',
             solution_steps=steps,
             seed=seed,
         )
@@ -281,24 +257,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
     # ── complement ────────────────────────────────────────────────────────────
 
     def _complement(self, rng: random.Random, seed: int) -> ProblemData:
-        contexts = [
-            {
-                'setup': lambda: (
-                    rng.randint(1, 5),  # num
-                    rng.randint(6, 12),  # den
-                ),
-                'template': (
-                    'I en klasse er sannsynligheten for at en tilfeldig valgt elev {verb} $P = {frac}$.\n'
-                    'Hva er sannsynligheten for at eleven {neg_verb}?'
-                ),
-                'verbs': [
-                    ('liker matematikk', 'ikke liker matematikk'),
-                    ('har bestått eksamen', 'ikke har bestått eksamen'),
-                    ('sykler til skolen', 'ikke sykler til skolen'),
-                ],
-            },
-        ]
-
         num = rng.randint(1, 5)
         den = rng.randint(6, 12)
         p = Fraction(num, den)
@@ -318,7 +276,6 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             'Komplementregelen: $P(A^c) = 1 - P(A)$.',
             f'$P = 1 - {_frac_latex(p)} = {_frac_latex(comp)}$',
         ]
-        short = f'$P = {_frac_latex(comp)}$'
 
         return ProblemData(
             generator_key='probability_classical',
@@ -326,7 +283,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=round(float(comp), 6),
-            solution_short=short,
+            solution_short=f'$P = {_frac_latex(comp)}$',
             solution_steps=steps,
             seed=seed,
         )
