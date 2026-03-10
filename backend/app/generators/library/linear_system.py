@@ -38,9 +38,8 @@ def _cases(eq1: str, eq2: str) -> str:
     return f'$$\\begin{{cases}} {eq1} \\\\ {eq2} \\end{{cases}}$$'
 
 
-def _signed(n: int) -> str:
-    """Format integer with explicit sign for display in steps: -3, +5 …"""
-    return str(n) if n < 0 else f'+{n}'
+def _cases3(eq1: str, eq2: str, eq3: str) -> str:
+    return f'$$\\begin{{cases}} {eq1} \\\\ {eq2} \\\\ {eq3} \\end{{cases}}$$'
 
 
 # ── Scenario pool for word problems ──────────────────────────────────────────
@@ -97,8 +96,12 @@ class LinearSystemGenerator(BaseGenerator):
     def metadata(self) -> GeneratorMeta:
         return GeneratorMeta(
             key='linear_system',
-            name='Lineære likningssystemer',
-            description='Løs et system av to lineære likninger med to ukjente.',
+            name='Likningssystemer',
+            description=(
+                'Lineære og ikke-lineære likningssystemer med to eller tre ukjente. '
+                'Subtyper: innsetting, addisjon, tekstoppgave, sum/produkt, '
+                'andregradssystem, kvadratdifferanse, tre ukjente.'
+            ),
             tema='Likninger',
             part='del1',
             answer_type='number',
@@ -106,7 +109,7 @@ class LinearSystemGenerator(BaseGenerator):
             default_weight=1.0,
         )
 
-    # ── Subtype generators ────────────────────────────────────────────────────
+    # ── Linear 2×2 ────────────────────────────────────────────────────────────
 
     def _gen_substitution(self, rng: random.Random, seed) -> ProblemData:
         """Eq1 is already solved for y: y = ax + b. Eq2 is cx + dy = e."""
@@ -114,17 +117,13 @@ class LinearSystemGenerator(BaseGenerator):
         y_val = rng.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
 
         a = rng.choice([1, 2, 3])
-        b = y_val - a * x_val          # y = ax + b
+        b = y_val - a * x_val
         c = rng.choice([2, 3, 4])
         d = rng.choice([1, 2, 3])
         e = c * x_val + d * y_val
 
-        # Format eq1 as "y = ax + b"
         b_str = (f' + {b}' if b > 0 else (f' - {abs(b)}' if b < 0 else ''))
-        if a == 1:
-            eq1_display = f'y = x{b_str}'
-        else:
-            eq1_display = f'y = {a}x{b_str}'
+        eq1_display = f'y = x{b_str}' if a == 1 else f'y = {a}x{b_str}'
         eq2_display = _eq(c, d, e)
 
         prompt = (
@@ -133,15 +132,13 @@ class LinearSystemGenerator(BaseGenerator):
             + '\nOppgi verdien av $x$.'
         )
 
-        # Substitution: cx + d(ax+b) = e → (c + da)x = e - db
         coeff_x = c + d * a
-        rhs = e - d * b          # = coeff_x * x_val
+        rhs = e - d * b
 
-        # Build step showing the substituted expression
-        if d == 1:
-            sub_expr = f'{c}x + ({a}x{b_str})'
-        else:
-            sub_expr = f'{c}x + {d}({a}x{b_str})'
+        sub_expr = (
+            f'{c}x + ({a}x{b_str})' if d == 1
+            else f'{c}x + {d}({a}x{b_str})'
+        )
 
         steps = [
             f'Sett inn $y = {a}x{b_str}$ i likning 2: ${sub_expr} = {e}$.',
@@ -159,12 +156,7 @@ class LinearSystemGenerator(BaseGenerator):
             correct_answer=x_val,
             solution_short=f'$x = {x_val}$, $y = {y_val}$',
             solution_steps=steps,
-            metadata={
-                'tema': 'likninger',
-                'difficulty': 3,
-                'latex': True,
-                'subtype': 'substitution',
-            },
+            metadata={'tema': 'likninger', 'difficulty': 3, 'latex': True, 'subtype': 'substitution'},
             assets=[],
             seed=seed or rng.randint(1, 10**9),
         )
@@ -176,14 +168,11 @@ class LinearSystemGenerator(BaseGenerator):
 
         a1 = rng.choice([1, 2, 3])
         b1 = rng.choice([1, 2, 3])
-
-        # Choose which variable to eliminate and the multiplier
         eliminate = rng.choice(['x', 'y'])
         k = rng.choice([2, 3])
 
         if eliminate == 'x':
             a2 = k * a1
-            # Choose b2 < k*b1 so that k*b1 - b2 > 0 (positive coefficient after elimination)
             pool = [v for v in range(1, k * b1) if v != k * b1]
             if not pool:
                 pool = [v for v in [1, 2, 3, 4, 5, 6] if v != k * b1]
@@ -207,13 +196,11 @@ class LinearSystemGenerator(BaseGenerator):
             + '\nOppgi verdien av $x + y$.'
         )
 
-        # Steps: multiply eq1 by k, then subtract eq2
         if eliminate == 'x':
-            elim_coeff = k * b1 - b2           # > 0 by construction
-            elim_rhs = k * c1 - c2             # = elim_coeff * y_val
+            elim_coeff = k * b1 - b2
+            elim_rhs = k * c1 - c2
             solved_val, solved_var = y_val, 'y'
-            # Back-substitute y_val into eq1 to find x
-            inter = c1 - b1 * solved_val       # = a1 * x_val
+            inter = c1 - b1 * solved_val
             if a1 == 1:
                 back_expr = f'x = {c1} - {b1} \\cdot {solved_val} = {x_val}'
             else:
@@ -222,11 +209,10 @@ class LinearSystemGenerator(BaseGenerator):
                     f' \\Rightarrow x = {x_val}'
                 )
         else:
-            elim_coeff = k * a1 - a2           # > 0 by construction
-            elim_rhs = k * c1 - c2             # = elim_coeff * x_val
+            elim_coeff = k * a1 - a2
+            elim_rhs = k * c1 - c2
             solved_val, solved_var = x_val, 'x'
-            # Back-substitute x_val into eq1 to find y
-            inter = c1 - a1 * solved_val       # = b1 * y_val
+            inter = c1 - a1 * solved_val
             if b1 == 1:
                 back_expr = f'y = {c1} - {a1} \\cdot {solved_val} = {y_val}'
             else:
@@ -236,8 +222,7 @@ class LinearSystemGenerator(BaseGenerator):
                 )
 
         steps = [
-            f'Multipliser likning 1 med ${k}$: '
-            f'${_eq(k * a1, k * b1, k * c1)}$.',
+            f'Multipliser likning 1 med ${k}$: ${_eq(k * a1, k * b1, k * c1)}$.',
             f'Trekk likning 2 fra: eliminerer ${eliminate}$, gir '
             f'${elim_coeff}{solved_var} = {elim_rhs}$.',
             f'${solved_var} = \\dfrac{{{elim_rhs}}}{{{elim_coeff}}} = {solved_val}$.',
@@ -253,12 +238,7 @@ class LinearSystemGenerator(BaseGenerator):
             correct_answer=x_val + y_val,
             solution_short=f'$x = {x_val}$, $y = {y_val}$ (sum: ${x_val + y_val}$)',
             solution_steps=steps,
-            metadata={
-                'tema': 'likninger',
-                'difficulty': 3,
-                'latex': True,
-                'subtype': 'elimination',
-            },
+            metadata={'tema': 'likninger', 'difficulty': 3, 'latex': True, 'subtype': 'elimination'},
             assets=[],
             seed=seed or rng.randint(1, 10**9),
         )
@@ -266,18 +246,15 @@ class LinearSystemGenerator(BaseGenerator):
     def _gen_word_problem(self, rng: random.Random, seed) -> ProblemData:
         """Real-world context: two items, two purchase totals → find unit price."""
         scenario = rng.choice(_SCENARIOS)
+        x_val = rng.choice([5, 10, 15, 20, 25, 30])
+        y_val = rng.choice([5, 10, 15, 20, 25, 30])
 
-        # Prices in multiples of 5 to keep totals clean
-        x_val = rng.choice([5, 10, 15, 20, 25, 30])  # price of item_a
-        y_val = rng.choice([5, 10, 15, 20, 25, 30])  # price of item_b
-
-        # Quantities — ensure non-degenerate system (q1a/q2a ≠ q1b/q2b)
         for _ in range(30):
             q1a = rng.choice([2, 3, 4])
             q1b = rng.choice([1, 2, 3])
             q2a = rng.choice([1, 2, 3])
             q2b = rng.choice([3, 4, 5])
-            if q1a * q2b != q2a * q1b:  # non-degenerate check
+            if q1a * q2b != q2a * q1b:
                 break
 
         T1 = q1a * x_val + q1b * y_val
@@ -297,17 +274,13 @@ class LinearSystemGenerator(BaseGenerator):
 
         eq1_display = _eq(q1a, q1b, T1)
         eq2_display = _eq(q2a, q2b, T2)
-
-        # Solve by elimination: multiply eq1 by q2a, eq2 by q1a, subtract to get y
-        # Then back-substitute.  (Use multiplier on the larger coeff for cleaner display.)
         mult1, mult2 = q2a, q1a
         elim_b = mult1 * q1b - mult2 * q2b
-        elim_rhs = mult1 * T1 - mult2 * T2   # = elim_b * y_val
-
-        back_rhs = T1 - q1b * y_val           # = q1a * x_val
+        elim_rhs = mult1 * T1 - mult2 * T2
+        back_rhs = T1 - q1b * y_val
 
         steps = [
-            f'Sett opp systemet:\n$\\begin{{cases}} {eq1_display} \\\\ {eq2_display} \\end{{cases}}$',
+            f'Sett opp systemet: $\\begin{{cases}} {eq1_display} \\\\ {eq2_display} \\end{{cases}}$',
             f'Multipliser likning 1 med ${mult1}$ og likning 2 med ${mult2}$, '
             f'og trekk fra hverandre for å eliminere $x$.',
             f'${elim_b}y = {elim_rhs} \\Rightarrow y = {y_val}$.',
@@ -322,16 +295,182 @@ class LinearSystemGenerator(BaseGenerator):
             prompt=prompt,
             answer_type='number',
             correct_answer=x_val,
-            solution_short=f'${scenario["item_a"]}$: ${x_val}$ kr, '
-                           f'${scenario["item_b"]}$: ${y_val}$ kr.',
+            solution_short=(
+                f'${scenario["item_a"]}$: ${x_val}$ kr, '
+                f'${scenario["item_b"]}$: ${y_val}$ kr.'
+            ),
             solution_steps=steps,
             metadata={
-                'tema': 'likninger',
-                'difficulty': 3,
-                'latex': True,
-                'subtype': 'word_problem',
-                'scenario': scenario['item_a'],
+                'tema': 'likninger', 'difficulty': 3, 'latex': True,
+                'subtype': 'word_problem', 'scenario': scenario['item_a'],
             },
+            assets=[],
+            seed=seed or rng.randint(1, 10**9),
+        )
+
+    # ── Non-linear 2×2 ────────────────────────────────────────────────────────
+
+    def _gen_sum_product(self, rng: random.Random, seed) -> ProblemData:
+        """x + y = s, xy = p  →  quadratic t² - st + p = 0."""
+        r1 = rng.choice([2, 3, 4, 5, 6, 7])
+        r2 = rng.choice([1, 2, 3, 4, 5, 6])
+        while r2 == r1:
+            r2 = rng.choice([1, 2, 3, 4, 5, 6])
+        lo, hi = min(r1, r2), max(r1, r2)
+        s, p = lo + hi, lo * hi
+
+        # Vary the framing
+        frame = rng.choice(['tall', 'sidelengder', 'alder'])
+        if frame == 'tall':
+            prompt = (
+                f'To positive tall har sum ${s}$ og produkt ${p}$.\n'
+                'Finn de to tallene og oppgi dem som en løsningsmengde.'
+            )
+        elif frame == 'sidelengder':
+            prompt = (
+                f'Et rektangel har omkretstillegg $\\frac{{O}}{{2}} = {s}$ '
+                f'og areal $A = {p}$.\n'
+                'Finn sidelengdene og oppgi dem som en løsningsmengde.'
+            )
+        else:  # alder
+            prompt = (
+                f'To søskens alder summeres til ${s}$ og produktet av aldrene er ${p}$.\n'
+                'Finn aldrene og oppgi dem som en løsningsmengde.'
+            )
+
+        steps = [
+            f'La $x$ og $y$ være de to tallene: $x + y = {s}$, $xy = {p}$.',
+            f'Fra $x + y = {s}$: $y = {s} - x$.',
+            f'Sett inn: $x({s} - x) = {p} \\Rightarrow x^2 - {s}x + {p} = 0$.',
+            f'Faktoriser: $(x - {lo})(x - {hi}) = 0$.',
+            f'Svar: $\\{{{lo}, {hi}\\}}$.',
+        ]
+
+        return ProblemData(
+            generator_key=self.metadata().key,
+            part='del1',
+            prompt=prompt,
+            answer_type='solution_set',
+            correct_answer=[lo, hi],
+            solution_short=f'$\\{{{lo}, {hi}\\}}$',
+            solution_steps=steps,
+            metadata={'tema': 'likninger', 'difficulty': 3, 'latex': True, 'subtype': 'sum_product'},
+            assets=[],
+            seed=seed or rng.randint(1, 10**9),
+        )
+
+    def _gen_quadratic_linear(self, rng: random.Random, seed) -> ProblemData:
+        """y = x²  and  x + y = n(n+1)  →  two integer x-solutions: n and -(n+1)."""
+        n = rng.choice([1, 2, 3, 4])
+        k = n * (n + 1)          # sum on RHS
+        x1, x2 = n, -(n + 1)    # x-solutions
+        y1, y2 = n**2, (n + 1)**2
+
+        prompt = (
+            'Løs likningssystemet\n'
+            + _cases(f'y = x^2', f'x + y = {k}')
+            + '\nOppgi løsningsmengden for $x$.'
+        )
+
+        steps = [
+            f'Sett inn $y = x^2$ i likning 2: $x + x^2 = {k}$.',
+            f'Skriv om: $x^2 + x - {k} = 0$.',
+            f'Faktoriser: $(x - {x1})(x + {n + 1}) = 0$.',
+            f'$x = {x1}$: $y = {x1}^2 = {y1}$.',
+            f'$x = {x2}$: $y = ({x2})^2 = {y2}$.',
+            f'Svar: $x \\in \\{{{x2}, {x1}\\}}$ med løsningspar '
+            f'$({x1}, {y1})$ og $({x2}, {y2})$.',
+        ]
+
+        return ProblemData(
+            generator_key=self.metadata().key,
+            part='del1',
+            prompt=prompt,
+            answer_type='solution_set',
+            correct_answer=sorted([x1, x2]),
+            solution_short=f'$x \\in \\{{{x2}, {x1}\\}}$',
+            solution_steps=steps,
+            metadata={'tema': 'likninger', 'difficulty': 4, 'latex': True, 'subtype': 'quadratic_linear'},
+            assets=[],
+            seed=seed or rng.randint(1, 10**9),
+        )
+
+    def _gen_difference_squares(self, rng: random.Random, seed) -> ProblemData:
+        """x + y = a,  x² − y² = c  →  factor as (x+y)(x−y) = c  →  linear system."""
+        r1 = rng.choice([3, 4, 5, 6, 7])        # larger value (= x)
+        r2 = rng.choice(list(range(1, r1)))      # smaller value (= y)
+        a = r1 + r2                              # sum
+        d = r1 - r2                              # difference
+        c = a * d                                # = r1² - r2²
+
+        prompt = (
+            'Løs likningssystemet\n'
+            + _cases(f'x + y = {a}', f'x^2 - y^2 = {c}')
+            + '\nLa $x > y > 0$. Oppgi verdien av $x$.'
+        )
+
+        steps = [
+            f'Faktoriser: $x^2 - y^2 = (x + y)(x - y) = {a}(x - y) = {c}$.',
+            f'Dermed: $x - y = \\dfrac{{{c}}}{{{a}}} = {d}$.',
+            f'Vi har nå: $x + y = {a}$ og $x - y = {d}$.',
+            f'Legg sammen: $2x = {a + d} \\Rightarrow x = {r1}$.',
+            f'Trekk fra: $2y = {a - d} \\Rightarrow y = {r2}$.',
+            f'Svar: $x = {r1}$, $y = {r2}$.',
+        ]
+
+        return ProblemData(
+            generator_key=self.metadata().key,
+            part='del1',
+            prompt=prompt,
+            answer_type='number',
+            correct_answer=r1,
+            solution_short=f'$x = {r1}$, $y = {r2}$',
+            solution_steps=steps,
+            metadata={'tema': 'likninger', 'difficulty': 3, 'latex': True, 'subtype': 'difference_squares'},
+            assets=[],
+            seed=seed or rng.randint(1, 10**9),
+        )
+
+    # ── Linear 3×3 ────────────────────────────────────────────────────────────
+
+    def _gen_three_vars(self, rng: random.Random, seed) -> ProblemData:
+        """x+y=a, y+z=b, x+z=c  →  add all, divide by 2, subtract each eq."""
+        x_val = rng.choice([1, 2, 3, 4, 5])
+        y_val = rng.choice([1, 2, 3, 4, 5])
+        z_val = rng.choice([1, 2, 3, 4, 5])
+
+        a = x_val + y_val
+        b = y_val + z_val
+        c = x_val + z_val
+        S = a + b + c            # = 2(x + y + z), always even
+
+        prompt = (
+            'Løs likningssystemet\n'
+            + _cases3(f'x + y = {a}', f'y + z = {b}', f'x + z = {c}')
+            + '\nOppgi verdien av $x + y + z$.'
+        )
+
+        steps = [
+            f'Legg sammen alle tre likningene: $2(x + y + z) = {a} + {b} + {c} = {S}$.',
+            f'$x + y + z = {S // 2}$.',
+            f'Trekk likning 2 ($y + z = {b}$) fra summen: $x = {S // 2} - {b} = {x_val}$.',
+            f'Trekk likning 3 ($x + z = {c}$) fra summen: $y = {S // 2} - {c} = {y_val}$.',
+            f'Trekk likning 1 ($x + y = {a}$) fra summen: $z = {S // 2} - {a} = {z_val}$.',
+            f'Svar: $x = {x_val}$, $y = {y_val}$, $z = {z_val}$.',
+        ]
+
+        return ProblemData(
+            generator_key=self.metadata().key,
+            part='del1',
+            prompt=prompt,
+            answer_type='number',
+            correct_answer=S // 2,
+            solution_short=(
+                f'$x + y + z = {S // 2}$ '
+                f'($x = {x_val}$, $y = {y_val}$, $z = {z_val}$)'
+            ),
+            solution_steps=steps,
+            metadata={'tema': 'likninger', 'difficulty': 3, 'latex': True, 'subtype': 'three_vars_pairwise'},
             assets=[],
             seed=seed or rng.randint(1, 10**9),
         )
@@ -341,14 +480,26 @@ class LinearSystemGenerator(BaseGenerator):
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
         subtype = rng.choices(
-            ['substitution', 'elimination', 'word_problem'],
-            weights=[35, 35, 30],
+            [
+                'substitution',
+                'elimination',
+                'word_problem',
+                'sum_product',
+                'quadratic_linear',
+                'difference_squares',
+                'three_vars_pairwise',
+            ],
+            weights=[20, 20, 15, 15, 12, 10, 8],
         )[0]
 
         gen = {
             'substitution': self._gen_substitution,
             'elimination': self._gen_elimination,
             'word_problem': self._gen_word_problem,
+            'sum_product': self._gen_sum_product,
+            'quadratic_linear': self._gen_quadratic_linear,
+            'difference_squares': self._gen_difference_squares,
+            'three_vars_pairwise': self._gen_three_vars,
         }[subtype]
         return gen(rng, seed)
 
