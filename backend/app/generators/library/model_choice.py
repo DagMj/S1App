@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import math
 import random
@@ -13,7 +13,7 @@ class ModelChoiceGenerator(BaseGenerator):
         return GeneratorMeta(
             key='model_choice',
             name='Modellvalg',
-            description='Velg modelltype som passer data i verditabell.',
+            description='Velg modellen som passer best til data i verditabell.',
             tema='Modellering',
             part='del2',
             answer_type='model_choice',
@@ -21,16 +21,26 @@ class ModelChoiceGenerator(BaseGenerator):
             default_weight=0.9,
         )
 
-    def _build_dataset(self, model: str) -> list[tuple[int, float]]:
+    def _build_dataset(self, model: str, rng: random.Random) -> list[tuple[int, float]]:
         x_vals = [0, 1, 2, 3, 4, 5, 6]
         if model == 'A':  # lineær
-            return [(x, 2.4 * x + 3.2) for x in x_vals]
+            m = rng.choice([1.5, 2.0, 2.4, 3.0, 3.5])
+            c = rng.choice([1.0, 2.0, 3.0, 4.0, 5.0])
+            return [(x, m * x + c) for x in x_vals]
         if model == 'B':  # eksponentiell
-            return [(x, 1.7 * (1.62**x)) for x in x_vals]
+            a = rng.choice([1.5, 2.0, 2.5, 3.0])
+            b = rng.choice([1.4, 1.5, 1.6, 1.8])
+            return [(x, a * (b**x)) for x in x_vals]
         if model == 'C':  # logistisk
-            return [(x, 18 / (1 + 10 * (0.58**x))) for x in x_vals]
+            L = rng.choice([15.0, 18.0, 20.0, 25.0])
+            A = rng.choice([8.0, 10.0, 12.0])
+            k = rng.choice([0.5, 0.6, 0.7, 0.8])
+            return [(x, L / (1 + A * (k**x))) for x in x_vals]
         # trigonometrisk
-        return [(x, 5 + 2.6 * math.sin((math.pi / 3) * x)) for x in x_vals]
+        amp = rng.choice([2.0, 2.5, 3.0, 3.5])
+        center = rng.choice([4.0, 5.0, 6.0])
+        period_factor = rng.choice([math.pi / 3, math.pi / 4])
+        return [(x, center + amp * math.sin(period_factor * x)) for x in x_vals]
 
     @staticmethod
     def _format_table(rows: list[tuple[int, float]]) -> str:
@@ -41,7 +51,7 @@ class ModelChoiceGenerator(BaseGenerator):
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
         model = rng.choice(['A', 'B', 'C', 'D'])
-        rows = self._build_dataset(model)
+        rows = self._build_dataset(model, rng)
 
         prompt = (
             'Velg modellen som passer best til datasettet.\n'
@@ -49,7 +59,12 @@ class ModelChoiceGenerator(BaseGenerator):
             'A) lineær  B) eksponentiell  C) logistisk  D) trigonometrisk'
         )
 
-        model_name = {'A': 'lineær', 'B': 'eksponentiell', 'C': 'logistisk', 'D': 'trigonometrisk'}[model]
+        model_name = {
+            'A': 'lineær',
+            'B': 'eksponentiell',
+            'C': 'logistisk',
+            'D': 'trigonometrisk',
+        }[model]
 
         return ProblemData(
             generator_key=self.metadata().key,

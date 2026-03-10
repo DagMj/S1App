@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import random
 
@@ -16,7 +16,7 @@ class LogarithmicEquationGenerator(BaseGenerator):
         return GeneratorMeta(
             key='logarithmic_equation',
             name='Logaritmelikninger',
-            description='Logaritmelikninger med lineært uttrykk eller log-regler.',
+            description='Logaritmelikninger: lineært uttrykk, log-regler, potensregel og differanse.',
             tema='Logaritmer',
             part='del1',
             answer_type='number',
@@ -26,9 +26,13 @@ class LogarithmicEquationGenerator(BaseGenerator):
 
     def generate(self, seed: int | None = None) -> ProblemData:
         rng = random.Random(seed)
-        subtype = rng.choice(['shifted', 'sum_logs'])
+        subtype = rng.choices(
+            ['shifted', 'sum_logs', 'power_log', 'log_difference'],
+            weights=[25, 25, 25, 25],
+        )[0]
 
         if subtype == 'shifted':
+            # log_b(ax + c) = exp
             base = rng.choice([2, 3, 5, 10])
             exp = rng.choice([1, 2, 3])
             rhs = base**exp
@@ -48,7 +52,9 @@ class LogarithmicEquationGenerator(BaseGenerator):
                 f'Løs den lineære likningen: $x = {x}$.',
                 f'Svar: $x = {x}$.',
             ]
-        else:
+
+        elif subtype == 'sum_logs':
+            # log_b(x) + log_b(x-m) = log_b(rhs)
             base = rng.choice([2, 3, 5, 10])
             m = rng.choice([1, 2, 3, 4])
             x = rng.choice([m + 2, m + 3, m + 4, m + 5])
@@ -58,9 +64,45 @@ class LogarithmicEquationGenerator(BaseGenerator):
                 f'= \\log_{{{base}}}({rhs})$$'
             )
             steps = [
-                f'Domene: $x > {m}$.',
+                f'Domene: $x > {m}$ (begge logaritmer må være definert).',
                 f'Bruk log-regel: $\\log_{{{base}}}(x) + \\log_{{{base}}}(x-{m}) = \\log_{{{base}}}(x(x-{m}))$.',
-                f'Da får vi $x(x-{m}) = {rhs}$, som gir $x = {x}$ i domenet.',
+                f'Da får vi $x(x-{m}) = {rhs}$, dvs. $x^2 - {m}x - {rhs} = 0$.',
+                f'Løsningene er $x = {x}$ og $x = {-(x - m)}$. Siden $x > {m}$ beholdes bare $x = {x}$.',
+            ]
+
+        elif subtype == 'power_log':
+            # n * log_b(x) = n*exp  →  log_b(x) = exp  →  x = b^exp
+            base = rng.choice([2, 3, 10])
+            n = rng.choice([2, 3])
+            exp = rng.choice([1, 2])
+            x = base**exp
+            rhs = n * exp  # n * log_b(x) = n*exp (høyresiden som tall)
+            prompt = (
+                f'Løs likningen $${n} \\cdot \\log_{{{base}}}(x) = {rhs}$$'
+            )
+            steps = [
+                f'Del begge sider på ${n}$: $\\log_{{{base}}}(x) = {exp}$.',
+                f'Skriv om til eksponentialform: $x = {base}^{{{exp}}}$.',
+                f'Svar: $x = {x}$.',
+            ]
+
+        else:  # log_difference
+            # log_b(x) - log_b(x-m) = 1  →  x/(x-m) = b  →  x = b*m/(b-1)
+            base = rng.choice([2, 3])
+            if base == 2:
+                m = rng.choice([1, 2, 3, 4])
+            else:  # base == 3
+                m = rng.choice([2, 4])  # gir heltallsverdi for x = 3m/2
+            x = base * m // (base - 1)
+            prompt = (
+                f'Løs likningen $$\\log_{{{base}}}(x) - \\log_{{{base}}}(x-{m}) = 1$$'
+            )
+            steps = [
+                f'Domene: $x > {m}$.',
+                f'Bruk log-regel: $\\log_{{{base}}}(x) - \\log_{{{base}}}(x-{m}) = \\log_{{{base}}}\\!\\left(\\dfrac{{x}}{{x-{m}}}\\right)$.',
+                f'Da: $\\dfrac{{x}}{{x-{m}}} = {base}^1 = {base}$.',
+                f'Løs: $x = {base}(x-{m}) \\Rightarrow x(1-{base}) = -{base} \\cdot {m} \\Rightarrow x = {x}$.',
+                f'Kontroll: $x = {x} > {m}$ ✓',
             ]
 
         return ProblemData(

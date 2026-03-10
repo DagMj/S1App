@@ -114,7 +114,7 @@ class RationalSimplifyGenerator(BaseGenerator):
             )
             steps = [
                 f'Fellesnevner er ${sp.latex(sp.expand(den1 * den2))} = ({sp.latex(den1)})({sp.latex(den2)})$.',
-                'Utvid brokene til fellesnevner og sla sammen tellerne.',
+                'Utvid brøkene til fellesnevner og slå sammen tellerne.',
                 f'Forkort uttrykket dersom mulig. Svar: ${sp.latex(simplified)}$.',
             ]
             solution_short = f'Svar: ${sp.latex(simplified)}$.'
