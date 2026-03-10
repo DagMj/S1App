@@ -59,8 +59,17 @@ def _wait_for_database(max_attempts: int = 12, sleep_seconds: float = 1.5) -> No
 
 
 def _seed_test_user(db: Session) -> None:
-    """Opprett testbrukeren (test/test) dersom den ikke allerede finnes."""
+    """Opprett testbrukeren (test@test.no / test) dersom den ikke allerede finnes.
+    Migrerer ogsaa gammel 'test'-bruker (uten @) til ny e-post."""
     email = settings.test_user_email
+
+    # Migrer gammel bruker med e-post 'test' (ingen @) til ny e-post
+    old = db.execute(select(User).where(User.email == 'test')).scalar_one_or_none()
+    if old:
+        old.email = email
+        db.commit()
+        logger.info('Testbruker migrert: test -> %s', email)
+
     existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if not existing:
         user = User(
@@ -71,7 +80,7 @@ def _seed_test_user(db: Session) -> None:
         )
         db.add(user)
         db.commit()
-        logger.info('Testbruker opprettet: brukernavn=%s, passord=test', email)
+        logger.info('Testbruker opprettet: %s / passord=test', email)
     else:
         logger.debug('Testbruker finnes allerede: %s', email)
 
