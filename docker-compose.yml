@@ -23,6 +23,7 @@
       ASSETS_LOCAL_URL_PREFIX: /assets
     ports:
       - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./backend/app/assets/generated:/app/app/assets/generated
       - ./backend:/app
