@@ -1,10 +1,8 @@
-﻿from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.generators.core.registry import registry
-from app.models.user import User
 from app.schemas.session import (
     ProblemRead,
     SessionSummary,
@@ -17,6 +15,8 @@ from app.schemas.session import (
 from app.services.session_service import GeneratedItem, session_service
 
 router = APIRouter()
+
+ANONYMOUS_USER_ID = 'anonymous'
 
 
 def _to_problem_read(session_id: str, item: GeneratedItem) -> ProblemRead:
@@ -47,9 +47,8 @@ def _to_problem_read(session_id: str, item: GeneratedItem) -> ProblemRead:
 @router.post('/exam/start', response_model=StartExamResponse)
 def start_exam(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> StartExamResponse:
-    session, items = session_service.start_exam(db, current_user.id)
+    session, items = session_service.start_exam(db, ANONYMOUS_USER_ID)
     payload_items = [_to_problem_read(session.id, item) for item in items]
     return StartExamResponse(session_id=session.id, mode=session.mode, items=payload_items)
 
@@ -58,9 +57,8 @@ def start_exam(
 def start_training(
     payload: StartTrainingRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> StartTrainingResponse:
-    session = session_service.start_training(db, current_user.id, payload.mode, payload.generator_keys)
+    session = session_service.start_training(db, ANONYMOUS_USER_ID, payload.mode, payload.generator_keys)
     return StartTrainingResponse(session_id=session.id, mode=session.mode)
 
 
@@ -68,9 +66,8 @@ def start_training(
 def next_training_problem(
     session_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> ProblemRead:
-    item = session_service.next_training_problem(db, session_id, current_user.id)
+    item = session_service.next_training_problem(db, session_id, ANONYMOUS_USER_ID)
     return _to_problem_read(session_id, item)
 
 
@@ -79,11 +76,10 @@ def submit_answer(
     session_id: str,
     payload: SubmitAnswerRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> SubmitAnswerResponse:
     submission, problem_data = session_service.submit_answer(
         db,
-        user_id=current_user.id,
+        user_id=ANONYMOUS_USER_ID,
         session_id=session_id,
         session_item_id=payload.session_item_id,
         answer=payload.answer,
@@ -107,10 +103,9 @@ def submit_answer(
 def session_summary(
     session_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> SessionSummary:
     try:
-        summary = session_service.session_summary(db, session_id, current_user.id)
+        summary = session_service.session_summary(db, session_id, ANONYMOUS_USER_ID)
     except HTTPException:
         raise
     return SessionSummary(**summary)

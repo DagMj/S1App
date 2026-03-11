@@ -1,20 +1,18 @@
-﻿import logging
+import logging
 import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import app.models  # noqa: F401
 from app.api.router import api_router
 from app.core.config import get_settings
-from app.core.security import get_password_hash
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 from app.generators.library import register_all_generators
-from app.models.user import User
 from app.services.generator_registry_service import registry_service
 
 logger = logging.getLogger(__name__)
@@ -58,30 +56,6 @@ def _wait_for_database(max_attempts: int = 12, sleep_seconds: float = 1.5) -> No
         raise last_error
 
 
-def _seed_admin_user(db: Session) -> None:
-    """Opprett eller oppgrader admin-bruker basert på SEED_ADMIN_* miljøvariabler."""
-    if not settings.seed_admin_email or not settings.seed_admin_password:
-        return
-    email = settings.seed_admin_email.lower()
-    existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
-    if existing:
-        if not existing.is_admin:
-            existing.is_admin = True
-            db.commit()
-            logger.info('Bruker oppgradert til admin: %s', email)
-        return
-    db.add(User(
-        email=email,
-        full_name=settings.seed_admin_full_name,
-        hashed_password=get_password_hash(settings.seed_admin_password),
-        is_active=True,
-        is_admin=True,
-    ))
-    db.commit()
-    logger.info('Admin-bruker opprettet: %s', email)
-
-
-
 @app.on_event('startup')
 def on_startup() -> None:
     app.state.db_ready = False
@@ -89,11 +63,13 @@ def on_startup() -> None:
     try:
         register_all_generators()
         _wait_for_database()
+        if settings.reset_db:
+            logger.warning('RESET_DB=true: dropping and recreating all tables')
+            Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         db = SessionLocal()
         try:
             registry_service.ensure_registered_in_db(db)
-            _seed_admin_user(db)
         finally:
             db.close()
         app.state.db_ready = True

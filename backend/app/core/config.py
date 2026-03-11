@@ -20,6 +20,8 @@ class Settings(BaseSettings):
 
     cors_origins: str = 'http://localhost:5173,http://localhost:3000,https://s1-app.vercel.app'
 
+    reset_db: bool = False  # Set to true once to drop and recreate all tables
+
     asset_storage_backend: str = 'local'  # local | s3
     assets_dir: Path = Path('app/assets/generated')
     assets_local_url_prefix: str = '/assets'
