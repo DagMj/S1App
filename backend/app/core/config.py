@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = 'HS256'
     access_token_expire_minutes: int = 60 * 24
 
-    cors_origins: str = 'http://localhost:5173,http://localhost:3000'
+    cors_origins: str = 'http://localhost:5173,http://localhost:3000,https://s1-app.vercel.app'
 
     asset_storage_backend: str = 'local'  # local | s3
     assets_dir: Path = Path('app/assets/generated')
