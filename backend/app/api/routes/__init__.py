@@ -1,3 +1,3 @@
-from app.api.routes import admin, auth, generators, modes, progress
+from app.api.routes import generators, modes
 
-__all__ = ['admin', 'auth', 'generators', 'modes', 'progress']
+__all__ = ['generators', 'modes']
