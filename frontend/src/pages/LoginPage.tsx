@@ -1,11 +1,18 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { login, register } from '../services/api'
+import { getMe, login, register, saveIsAdmin } from '../services/api'
 
 const DEV_USERS = [
   { label: 'Test Elev', email: 'elev@test.no', password: 'elev123' },
+  { label: 'Test Admin', email: 'admin@test.no', password: 'admin123' },
 ]
+
+async function loginAndSaveRole(email: string, password: string) {
+  await login(email, password)
+  const me = await getMe()
+  saveIsAdmin(me.is_admin)
+}
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -24,7 +31,7 @@ export function LoginPage() {
       if (isRegister) {
         await register(email, fullName, password)
       }
-      await login(email, password)
+      await loginAndSaveRole(email, password)
       navigate('/dashboard')
     } catch (err) {
       setError((err as Error).message)
@@ -37,7 +44,7 @@ export function LoginPage() {
     setBusy(true)
     setError('')
     try {
-      await login(devEmail, devPassword)
+      await loginAndSaveRole(devEmail, devPassword)
       navigate('/dashboard')
     } catch (err) {
       setError((err as Error).message)

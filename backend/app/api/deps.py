@@ -22,3 +22,9 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Bruker er deaktivert')
     return user
+
+
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Krever admin-tilgang')
+    return current_user

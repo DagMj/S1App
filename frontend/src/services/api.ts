@@ -60,6 +60,7 @@ export type ProgressOverview = {
 }
 
 const TOKEN_KEY = 's1_token'
+const IS_ADMIN_KEY = 's1_is_admin'
 
 export function saveToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token)
@@ -71,6 +72,15 @@ export function getToken(): string | null {
 
 export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(IS_ADMIN_KEY)
+}
+
+export function saveIsAdmin(isAdmin: boolean): void {
+  localStorage.setItem(IS_ADMIN_KEY, isAdmin ? '1' : '0')
+}
+
+export function getIsAdmin(): boolean {
+  return localStorage.getItem(IS_ADMIN_KEY) === '1'
 }
 
 function authHeaders(): HeadersInit {
@@ -133,7 +143,7 @@ export async function login(email: string, password: string): Promise<void> {
   saveToken(data.access_token)
 }
 
-export async function getMe(): Promise<{ id: string; email: string; full_name: string }> {
+export async function getMe(): Promise<{ id: string; email: string; full_name: string; is_admin: boolean }> {
   return request('/auth/me', { method: 'GET' })
 }
 

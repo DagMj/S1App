@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_admin
 from app.db.session import get_db
 from app.generators.core.registry import registry
 from app.models.generator import GeneratorConfig
-from app.models.user import User
 from app.schemas.generator import GeneratorConfigRead, GeneratorConfigUpdate, GeneratorSampleResponse
 from app.services.generator_registry_service import registry_service
 
@@ -18,7 +17,7 @@ router = APIRouter()
 @router.get('/generators', response_model=list[GeneratorConfigRead])
 def admin_list_generators(
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _=Depends(get_current_admin),
 ) -> list[GeneratorConfigRead]:
     registry_service.ensure_registered_in_db(db)
     rows = db.execute(select(GeneratorConfig).order_by(GeneratorConfig.key)).scalars().all()
@@ -30,7 +29,7 @@ def update_generator(
     key: str,
     payload: GeneratorConfigUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _=Depends(get_current_admin),
 ) -> GeneratorConfigRead:
     row = db.execute(select(GeneratorConfig).where(GeneratorConfig.key == key)).scalar_one_or_none()
     if not row:
@@ -48,7 +47,7 @@ def update_generator(
 def generator_sample(
     key: str,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _=Depends(get_current_admin),
 ) -> GeneratorSampleResponse:
     registry_service.ensure_registered_in_db(db)
     config = db.execute(select(GeneratorConfig).where(GeneratorConfig.key == key)).scalar_one_or_none()
@@ -73,7 +72,7 @@ def generator_sample(
 def stress_generator(
     key: str,
     count: int = Query(default=1000, ge=10, le=10000),
-    _: User = Depends(get_current_user),
+    _=Depends(get_current_admin),
 ) -> dict:
     if key not in registry.keys():
         raise HTTPException(status_code=404, detail='Generator ikke funnet i register')
