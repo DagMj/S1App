@@ -67,15 +67,32 @@ def _wait_for_database(max_attempts: int = 12, sleep_seconds: float = 1.5) -> No
         raise last_error
 
 
-def _drop_user_fk_constraints() -> None:
-    """Drop FK constraints on user_id columns that referenced the now-removed users table."""
+def _migrate_remove_user_dependency() -> None:
+    """Remove user_id FK and NOT NULL constraints left over from when auth existed."""
     db_url = str(engine.url)
+    is_postgres = 'postgresql' in db_url or 'postgres' in db_url
+    if not is_postgres:
+        return  # SQLite doesn't enforce FK/NOT NULL in same way
     try:
         with engine.connect() as conn:
-            if 'postgresql' in db_url or 'postgres' in db_url:
-                conn.execute(text(
-                    'ALTER TABLE practice_sessions DROP CONSTRAINT IF EXISTS practice_sessions_user_id_fkey'
-                ))
+            # Drop FK constraints (IF EXISTS = safe no-op if already removed)
+            conn.execute(text(
+                'ALTER TABLE practice_sessions DROP CONSTRAINT IF EXISTS practice_sessions_user_id_fkey'
+            ))
+            conn.execute(text(
+                'ALTER TABLE submissions DROP CONSTRAINT IF EXISTS submissions_user_id_fkey'
+            ))
+            # Drop NOT NULL so we can insert without user_id
+            conn.execute(text(
+                'ALTER TABLE practice_sessions ALTER COLUMN user_id DROP NOT NULL'
+            ))
+            conn.execute(text(
+                'ALTER TABLE submissions ALTER COLUMN user_id DROP NOT NULL'
+            ))
+            conn.commit()
+            logger.info('Removed user_id FK and NOT NULL constraints')
+    except Exception as exc:
+        logger.warning('Could not migrate user_id constraints (tables may not exist yet): %s', exc)
                 conn.execute(text(
                     'ALTER TABLE submissions DROP CONSTRAINT IF EXISTS submissions_user_id_fkey'
                 ))
@@ -97,7 +114,7 @@ def on_startup() -> None:
             logger.warning('RESET_DB=true: dropping and recreating all tables')
             Base.metadata.drop_all(bind=engine)
         else:
-            _drop_user_fk_constraints()
+            _migrate_remove_user_dependency()
         Base.metadata.create_all(bind=engine)
         db = SessionLocal()
         try:
