@@ -14,6 +14,11 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: 'Segoe UI', 'Noto Sans', sans-serif;
@@ -71,6 +76,7 @@ a {
   max-width: 1120px;
   margin: 0 auto;
   padding: 1.25rem;
+  overflow-x: hidden;
 }
 
 .hero {
@@ -367,8 +373,14 @@ select {
   text-align: left;
 }
 
+.math-text {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 .math-text p {
   margin: 0.5rem 0;
+  overflow-wrap: anywhere;
 }
 
 .hint-section {
@@ -450,8 +462,73 @@ select {
   }
 }
 
+@media (max-width: 600px) {
+  .main-content {
+    padding: 0.75rem;
+  }
+
+  .topbar {
+    padding: 0.65rem 0.9rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .nav-links {
+    gap: 0.3rem;
+    font-size: 0.88rem;
+  }
+
+  .nav-links a {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 0.75rem;
+  }
+
+  .problem-card {
+    padding: 0.65rem;
+  }
+
+  .hero {
+    padding: 1.25rem;
+  }
+
+  .data-table {
+    font-size: 0.85rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.3rem;
+  }
+
+  .solution-steps {
+    margin-left: 0.8rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+  }
+}
 
 
+
+
+/* KaTeX block math: scroll horizontally on narrow screens */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
 .dev-quicklogin {
   margin-top: 1.5rem;
   padding: 0.75rem 1rem;
