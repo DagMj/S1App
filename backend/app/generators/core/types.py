@@ -24,7 +24,7 @@ class ProblemData(BaseModel):
     correct_answer: Any
     solution_short: str
     solution_steps: list[str]
-    metadata: dict[str, Any]
+    metadata: dict[str, Any] = Field(default_factory=dict)
     assets: list[str] = []
     max_points: float = 1.0
     seed: int
