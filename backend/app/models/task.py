@@ -24,4 +24,8 @@ class ProblemInstance(Base):
     seed: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    session_item_id: Mapped[str | None] = mapped_column(String(36), ForeignKey('session_items.id', ondelete='SET NULL'), nullable=True)
+    session_item_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey('session_items.id', ondelete='SET NULL', use_alter=True, name='fk_problem_session_item'),
+        nullable=True,
+    )
