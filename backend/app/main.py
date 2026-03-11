@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 
@@ -95,10 +96,7 @@ def _migrate_remove_user_dependency() -> None:
         logger.warning('Could not migrate user_id constraints (tables may not exist yet): %s', exc)
 
 
-@app.on_event('startup')
-def on_startup() -> None:
-    app.state.db_ready = False
-
+def _startup_sync() -> None:
     try:
         register_all_generators()
         _wait_for_database()
@@ -116,6 +114,13 @@ def on_startup() -> None:
         app.state.db_ready = True
     except Exception as exc:  # pragma: no cover
         logger.exception('Database init failed during startup, running in degraded mode: %s', exc)
+
+
+@app.on_event('startup')
+async def on_startup() -> None:
+    app.state.db_ready = False
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, _startup_sync)
 
 
 @app.get('/health')
