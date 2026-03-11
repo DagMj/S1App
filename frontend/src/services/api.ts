@@ -1,4 +1,4 @@
-﻿export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1'
 
 export type GeneratorConfig = {
   key: string
@@ -51,51 +51,12 @@ export type SessionSummary = {
   score: number
 }
 
-export type ProgressOverview = {
-  solved_total: number
-  correct_total: number
-  accuracy: number
-  del1_solved: number
-  del2_solved: number
-}
-
-const TOKEN_KEY = 's1_token'
-const IS_ADMIN_KEY = 's1_is_admin'
-
-export function saveToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token)
-}
-
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
-}
-
-export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(IS_ADMIN_KEY)
-}
-
-export function saveIsAdmin(isAdmin: boolean): void {
-  localStorage.setItem(IS_ADMIN_KEY, isAdmin ? '1' : '0')
-}
-
-export function getIsAdmin(): boolean {
-  return localStorage.getItem(IS_ADMIN_KEY) === '1'
-}
-
-function authHeaders(): HeadersInit {
-  const token = getToken()
-  if (!token) return {}
-  return { Authorization: `Bearer ${token}` }
-}
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
       ...(init?.headers ?? {}),
-      ...authHeaders(),
     },
   })
 
@@ -112,39 +73,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   return (await res.json()) as T
-}
-
-export async function register(email: string, fullName: string, password: string): Promise<void> {
-  await request('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({ email, full_name: fullName, password }),
-  })
-}
-
-export async function login(email: string, password: string): Promise<void> {
-  const body = new URLSearchParams()
-  body.set('username', email)
-  body.set('password', password)
-
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body,
-  })
-
-  if (!res.ok) {
-    const t = await res.text()
-    throw new Error(t || 'Innlogging feilet')
-  }
-
-  const data = (await res.json()) as { access_token: string }
-  saveToken(data.access_token)
-}
-
-export async function getMe(): Promise<{ id: string; email: string; full_name: string; is_admin: boolean }> {
-  return request('/auth/me', { method: 'GET' })
 }
 
 export async function listGenerators(): Promise<GeneratorConfig[]> {
@@ -184,56 +112,6 @@ export async function getSessionSummary(sessionId: string): Promise<SessionSumma
   return request(`/modes/sessions/${sessionId}/summary`, { method: 'GET' })
 }
 
-export async function getProgressOverview(): Promise<ProgressOverview> {
-  return request('/progress/me/overview', { method: 'GET' })
-}
-
-export async function getProgressPerGenerator(): Promise<
-  Array<{ generator_key: string; solved: number; correct: number; accuracy: number }>
-> {
-  return request('/progress/me/per-generator', { method: 'GET' })
-}
-
-export async function getProgressTimeline(): Promise<
-  Array<{ date: string; solved: number; correct: number; accuracy: number }>
-> {
-  return request('/progress/me/timeline', { method: 'GET' })
-}
-
-export async function adminListGenerators(): Promise<GeneratorConfig[]> {
-  return request('/admin/generators', { method: 'GET' })
-}
-
-export async function adminUpdateGenerator(
-  key: string,
-  payload: Partial<Pick<GeneratorConfig, 'part' | 'weight' | 'is_enabled'>>,
-): Promise<GeneratorConfig> {
-  return request(`/admin/generators/${key}`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload),
-  })
-}
-
-export async function adminSampleGenerator(key: string): Promise<{
-  generator_key: string
-  generator_name?: string
-  prompt: string
-  answer_type: string
-  metadata: Record<string, unknown>
-  assets: string[]
-  solution_short: string
-  solution_steps: string[]
-}> {
-  return request(`/admin/generators/${key}/sample`, { method: 'GET' })
-}
-
-export async function adminStressGenerator(
-  key: string,
-  count = 1000,
-): Promise<{ ok: boolean; failures: string[] }> {
-  return request(`/admin/generators/${key}/stress?count=${count}`, { method: 'POST' })
-}
-
 export function toAssetUrl(assetPath: string): string {
   if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) {
     return assetPath
@@ -241,4 +119,3 @@ export function toAssetUrl(assetPath: string): string {
   const origin = API_BASE_URL.replace('/api/v1', '')
   return `${origin}${assetPath}`
 }
-
