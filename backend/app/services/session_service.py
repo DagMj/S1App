@@ -52,6 +52,7 @@ class SessionService:
         del2_keys = weighted_sample_without_replacement(del2_keys_pool, del2_weights, 4, seed=seed + 1)
 
         session = PracticeSession(
+            user_id=user_id,
             mode="exam",
             status="active",
             config_json={"del1_keys": del1_keys, "del2_keys": del2_keys, "seed": seed},
@@ -105,6 +106,7 @@ class SessionService:
                 raise HTTPException(status_code=400, detail=f"Generator er deaktivert: {key}")
 
         session = PracticeSession(
+            user_id=user_id,
             mode=mode,
             status="active",
             config_json={"generator_keys": generator_keys},
@@ -208,6 +210,7 @@ class SessionService:
             session_id=session.id,
             session_item_id=item.id,
             problem_id=problem.id,
+            user_id=user_id,
             raw_answer=answer,
             normalized_answer=eval_result.normalized_answer,
             is_correct=eval_result.is_correct,
