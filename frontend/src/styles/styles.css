@@ -529,25 +529,87 @@ select {
   overflow-y: hidden;
   padding-bottom: 2px;
 }
-.dev-quicklogin {
-  margin-top: 1.5rem;
-  padding: 0.75rem 1rem;
-  border: 1px dashed #e0a800;
-  border-radius: 6px;
-  background: #fffbea;
+.subject-selection {
+  max-width: 640px;
+  margin: 0 auto;
 }
 
-.dev-quicklogin__label {
-  font-size: 0.75rem;
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.subject-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.4rem 0.5rem;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.subject-card--available {
+  border-color: var(--brand);
+  background: #e8f8f4;
+}
+
+.subject-card--available:hover {
+  background: #d1f3f0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.15);
+}
+
+.subject-card--unavailable {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.subject-card--unavailable:hover {
+  opacity: 0.7;
+}
+
+.subject-label {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.subject-badge {
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #b07800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 0.5rem;
+  background: var(--brand);
+  color: white;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  letter-spacing: 0.04em;
 }
 
-.dev-quicklogin .ghost {
-  width: 100%;
-  text-align: left;
-  margin-top: 0.25rem;
+.subject-coming-soon {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: #7a5800;
+  font-size: 0.95rem;
+  text-align: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .subject-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
