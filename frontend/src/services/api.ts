@@ -91,7 +91,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.text()
-    throw new Error(body || `Feil ${res.status}`)
+    let message = body || `Feil ${res.status}`
+    try {
+      const json = JSON.parse(body)
+      if (json?.detail) message = json.detail
+    } catch {
+      // not JSON – use raw body
+    }
+    throw new Error(message)
   }
 
   return (await res.json()) as T
