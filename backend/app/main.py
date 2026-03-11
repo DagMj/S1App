@@ -93,14 +93,6 @@ def _migrate_remove_user_dependency() -> None:
             logger.info('Removed user_id FK and NOT NULL constraints')
     except Exception as exc:
         logger.warning('Could not migrate user_id constraints (tables may not exist yet): %s', exc)
-                conn.execute(text(
-                    'ALTER TABLE submissions DROP CONSTRAINT IF EXISTS submissions_user_id_fkey'
-                ))
-                conn.commit()
-                logger.info('Dropped user FK constraints from practice_sessions and submissions')
-            # SQLite does not enforce FK constraints by default, no action needed
-    except Exception as exc:
-        logger.warning('Could not drop user FK constraints (may not exist): %s', exc)
 
 
 @app.on_event('startup')
