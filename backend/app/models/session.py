@@ -11,7 +11,7 @@ class PracticeSession(Base):
     __tablename__ = 'practice_sessions'
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(String(36), ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    user_id: Mapped[str] = mapped_column(String(36), index=True, default='anonymous')
     mode: Mapped[str] = mapped_column(String(30), index=True)
     status: Mapped[str] = mapped_column(String(20), default='active')
     config_json: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -40,7 +40,7 @@ class Submission(Base):
     session_id: Mapped[str] = mapped_column(String(36), ForeignKey('practice_sessions.id', ondelete='CASCADE'), index=True)
     session_item_id: Mapped[str] = mapped_column(String(36), ForeignKey('session_items.id', ondelete='CASCADE'), index=True)
     problem_id: Mapped[str] = mapped_column(String(36), ForeignKey('problem_instances.id', ondelete='CASCADE'), index=True)
-    user_id: Mapped[str] = mapped_column(String(36), ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    user_id: Mapped[str] = mapped_column(String(36), index=True, default='anonymous')
     raw_answer: Mapped[str] = mapped_column(Text)
     normalized_answer: Mapped[str] = mapped_column(Text, default='')
     is_correct: Mapped[bool] = mapped_column(Boolean)
