@@ -13,6 +13,7 @@ class UserRead(BaseModel):
     id: str
     email: EmailStr
     full_name: str
+    is_admin: bool
     created_at: datetime
 
     class Config:

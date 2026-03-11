@@ -1,10 +1,11 @@
 ﻿import { PropsWithChildren } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
-import { clearToken, getToken } from '../services/api'
+import { clearToken, getIsAdmin, getToken } from '../services/api'
 
 export function AppLayout({ children }: PropsWithChildren) {
   const authed = Boolean(getToken())
+  const isAdmin = getIsAdmin()
 
   return (
     <div className="app-shell">
@@ -14,7 +15,7 @@ export function AppLayout({ children }: PropsWithChildren) {
           <NavLink to="/dashboard">Oversikt</NavLink>
           <NavLink to="/modes">Modus</NavLink>
           <NavLink to="/progress">Progresjon</NavLink>
-          <NavLink to="/admin">Admin</NavLink>
+          {isAdmin && <NavLink to="/admin">Admin</NavLink>}
           {!authed ? (
             <NavLink to="/login">Innlogging</NavLink>
           ) : (

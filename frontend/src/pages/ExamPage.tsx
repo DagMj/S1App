@@ -30,15 +30,22 @@ export function ExamPage() {
 
   async function createExam() {
     setError('')
-    try {
-      const res = await startExam()
-      setSessionId(res.session_id)
-      setItems(res.items)
-      setIndex(0)
-      setAnswered({})
-      setFeedback(null)
-    } catch (err) {
-      setError((err as Error).message)
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await startExam()
+        setSessionId(res.session_id)
+        setItems(res.items)
+        setIndex(0)
+        setAnswered({})
+        setFeedback(null)
+        return
+      } catch (err) {
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 1500))
+          continue
+        }
+        setError((err as Error).message)
+      }
     }
   }
 
