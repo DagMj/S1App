@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 os.environ['DATABASE_URL'] = 'sqlite:///./test_s1.db'
 os.environ['ASSETS_DIR'] = 'app/assets/test_generated'
 os.environ['ASSET_STORAGE_BACKEND'] = 'local'
+os.environ['TEST_MODE'] = 'false'
 
 from app.core.config import get_settings  # noqa: E402
 
