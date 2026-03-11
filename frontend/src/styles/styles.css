@@ -451,3 +451,26 @@ select {
 }
 
 
+
+.dev-quicklogin {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed #e0a800;
+  border-radius: 6px;
+  background: #fffbea;
+}
+
+.dev-quicklogin__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b07800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem;
+}
+
+.dev-quicklogin .ghost {
+  width: 100%;
+  text-align: left;
+  margin-top: 0.25rem;
+}

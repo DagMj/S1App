@@ -1,7 +1,11 @@
-﻿import { FormEvent, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { login, register } from '../services/api'
+
+const DEV_USERS = [
+  { label: 'Test Elev', email: 'elev@test.no', password: 'elev123' },
+]
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,6 +33,19 @@ export function LoginPage() {
     }
   }
 
+  async function quickLogin(devEmail: string, devPassword: string) {
+    setBusy(true)
+    setError('')
+    try {
+      await login(devEmail, devPassword)
+      navigate('/dashboard')
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="panel narrow">
       <h2>{isRegister ? 'Registrering' : 'Innlogging'}</h2>
@@ -46,6 +63,22 @@ export function LoginPage() {
       <button className="ghost" onClick={() => setIsRegister((v) => !v)}>
         {isRegister ? 'Har allerede bruker' : 'Opprett ny bruker'}
       </button>
+
+      {import.meta.env.DEV && (
+        <div className="dev-quicklogin">
+          <p className="dev-quicklogin__label">Hurtiginnlogging (kun i dev)</p>
+          {DEV_USERS.map((u) => (
+            <button
+              key={u.email}
+              className="ghost"
+              disabled={busy}
+              onClick={() => quickLogin(u.email, u.password)}
+            >
+              {u.label} — {u.email}
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
