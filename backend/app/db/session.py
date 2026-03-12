@@ -29,7 +29,14 @@ def _normalize_database_url(raw_url: str | None) -> str:
 
 
 def _build_engine(url: str):
-    connect_args = {'check_same_thread': False} if url.startswith('sqlite') else {}
+    if url.startswith('sqlite'):
+        connect_args = {'check_same_thread': False}
+    else:
+        # connect_timeout (seconds) ensures each failed attempt times out quickly
+        # instead of hanging on the TCP default (~75s). With 12 retries at 1.5s
+        # sleep, worst-case DB wait is 12 * (5 + 1.5) ≈ 78s — within Railway's
+        # 120s health-check window even if the DB is temporarily unavailable.
+        connect_args = {'connect_timeout': 5}
     engine_kwargs = {
         'future': True,
         'echo': False,
