@@ -1,5 +1,7 @@
 ﻿from __future__ import annotations
 
+import threading
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -8,7 +10,12 @@ from app.models.generator import GeneratorConfig
 
 
 class GeneratorRegistryService:
+    _lock = threading.Lock()
     def ensure_registered_in_db(self, db: Session) -> None:
+        with self._lock:
+            self._do_ensure_registered(db)
+
+    def _do_ensure_registered(self, db: Session) -> None:
         for generator in registry.all():
             meta = generator.metadata()
             existing = db.execute(

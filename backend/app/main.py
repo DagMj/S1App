@@ -96,9 +96,9 @@ def _migrate_remove_user_dependency() -> None:
         logger.warning('Could not migrate user_id constraints (tables may not exist yet): %s', exc)
 
 
-def _startup_sync() -> None:
+def _startup_db() -> None:
+    """DB-only init — runs in background thread. Generators already in memory."""
     try:
-        register_all_generators()
         _wait_for_database()
         if settings.reset_db:
             logger.warning('RESET_DB=true: dropping and recreating all tables')
@@ -112,15 +112,21 @@ def _startup_sync() -> None:
         finally:
             db.close()
         app.state.db_ready = True
+        logger.info('Database ready.')
     except Exception as exc:  # pragma: no cover
-        logger.exception('Database init failed during startup, running in degraded mode: %s', exc)
+        logger.exception('Database init failed, running in degraded mode: %s', exc)
 
 
 @app.on_event('startup')
 async def on_startup() -> None:
     app.state.db_ready = False
+    # Register generators in memory synchronously — fast (<1s), no DB needed.
+    # Must complete before any route handler runs so the registry is always populated.
+    register_all_generators()
+    # Fire-and-forget DB init so uvicorn binds immediately and the Railway
+    # /health check succeeds on the very first attempt.
     loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, _startup_sync)
+    loop.run_in_executor(None, _startup_db)
 
 
 @app.get('/health')
