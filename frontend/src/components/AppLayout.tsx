@@ -1,11 +1,15 @@
 import { PropsWithChildren } from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 export function AppLayout({ children }: PropsWithChildren) {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand">Eksamenstrening</Link>
+        <NavLink to="/" className="brand">Eksamenstrening</NavLink>
+        <nav className="nav-links">
+          <NavLink to="/s1">S1</NavLink>
+          <NavLink to="/progress">Fremgang</NavLink>
+        </nav>
       </header>
       <main className="main-content">{children}</main>
     </div>

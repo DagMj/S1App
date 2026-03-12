@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
-from app.api.routes import generators, modes
+from app.api.routes import generators, modes, progress
 
 api_router = APIRouter()
 api_router.include_router(generators.router, prefix='/generators', tags=['Generatorer'])
 api_router.include_router(modes.router, prefix='/modes', tags=['Moduser'])
+api_router.include_router(progress.router, prefix='/progress', tags=['Fremgang'])
