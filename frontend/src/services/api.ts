@@ -51,6 +51,28 @@ export type SessionSummary = {
   score: number
 }
 
+export type ProgressOverview = {
+  solved_total: number
+  correct_total: number
+  accuracy: number
+  del1_solved: number
+  del2_solved: number
+}
+
+export type ProgressPerGenerator = {
+  generator_key: string
+  solved: number
+  correct: number
+  accuracy: number
+}
+
+export type ProgressTimelinePoint = {
+  date: string
+  solved: number
+  correct: number
+  accuracy: number
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
@@ -110,6 +132,18 @@ export async function submitAnswer(
 
 export async function getSessionSummary(sessionId: string): Promise<SessionSummary> {
   return request(`/modes/sessions/${sessionId}/summary`, { method: 'GET' })
+}
+
+export async function getProgressOverview(): Promise<ProgressOverview> {
+  return request('/progress/overview', { method: 'GET' })
+}
+
+export async function getProgressPerGenerator(): Promise<ProgressPerGenerator[]> {
+  return request('/progress/generators', { method: 'GET' })
+}
+
+export async function getProgressTimeline(): Promise<ProgressTimelinePoint[]> {
+  return request('/progress/timeline', { method: 'GET' })
 }
 
 export function toAssetUrl(assetPath: string): string {
