@@ -247,7 +247,7 @@ class ProbabilityTwoStepGenerator(BaseGenerator):
                 'Hva er sannsynligheten for at begge kortene er bildekort (J, Q eller K)?'
             )
             steps = [
-                f'Bildekort: $4 \\times 3 = 12$ stykker.',
+                'Bildekort: $4 \\times 3 = 12$ stykker.',
                 f'$P(\\text{{bildekort}}_1) = {_frac_latex(p1)}$.',
                 f'$P(\\text{{bildekort}}_2 \\mid \\text{{bildekort}}_1) = {_frac_latex(p2)}$.',
                 f'$P = {_frac_latex(p1)} \\cdot {_frac_latex(p2)} = {_frac_latex(prob)}$',

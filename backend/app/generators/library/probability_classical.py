@@ -141,7 +141,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Hva er sannsynligheten for at summen blir {target}?'
             )
             steps = [
-                f'Totalt antall utfall: $6 \\times 6 = 36$.',
+                'Totalt antall utfall: $6 \\times 6 = 36$.',
                 f'Gunstige summer lik {target}: {fav} utfall.',
                 f'$P(\\text{{sum}} = {target}) = {_frac_latex(prob)}$',
             ]
@@ -155,7 +155,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
                 f'Hva er sannsynligheten for at summen er minst {k}?'
             )
             steps = [
-                f'Totalt: 36 utfall.',
+                'Totalt: 36 utfall.',
                 f'Utfall med sum $\\geq {k}$: {fav} stykker.',
                 f'$P(\\text{{sum}} \\geq {k}) = {_frac_latex(prob)}$',
             ]
@@ -239,7 +239,7 @@ class ProbabilityClassicalGenerator(BaseGenerator):
             )
             steps = [
                 f'Totalt: {total} utfall.',
-                f'Gunstig utfall: kun 1 (alle kron).',
+                'Gunstig utfall: kun 1 (alle kron).',
                 f'$P = {_frac_latex(prob)}$',
             ]
 
