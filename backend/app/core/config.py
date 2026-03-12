@@ -14,10 +14,6 @@ class Settings(BaseSettings):
 
     database_url: str = 'sqlite:///./s1_mvp.db'
 
-    jwt_secret_key: str = 'change-me-in-production'
-    jwt_algorithm: str = 'HS256'
-    access_token_expire_minutes: int = 60 * 24
-
     cors_origins: str = 'http://localhost:5173,http://localhost:3000,https://s1-app.vercel.app'
 
     reset_db: bool = False  # Set to true once to drop and recreate all tables
@@ -35,12 +31,6 @@ class Settings(BaseSettings):
     assets_public_base_url: str | None = None
 
     ai_fallback_enabled: bool = True
-
-    # Sett disse i .env for å opprette en admin-bruker automatisk ved oppstart.
-    # Eksisterende bruker oppgraderes til admin hvis e-posten finnes allerede.
-    seed_admin_email: str | None = None
-    seed_admin_password: str | None = None
-    seed_admin_full_name: str = 'Administrator'
 
 
 @lru_cache

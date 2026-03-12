@@ -65,7 +65,7 @@ class CombinatoricsProbabilityGenerator(BaseGenerator):
             )
             steps = [
                 'Rekkefølgen betyr noe og vi legger ikke tilbake → permutasjon uten tilbakelegging.',
-                f'Formel: $P(n, k) = \\dfrac{{n!}}{{(n-k)!}}$',
+                'Formel: $P(n, k) = \\dfrac{n!}{(n-k)!}$',
                 f'$P({n}, {k}) = \\dfrac{{{n}!}}{{{n-k}!}} = {ans}$',
             ]
 
@@ -94,7 +94,7 @@ class CombinatoricsProbabilityGenerator(BaseGenerator):
             )
             steps = [
                 'Vi bryr oss ikke om rekkefølgen og legger ikke tilbake → kombinasjon.',
-                f'Formel: $C(n, k) = \\dbinom{{n}}{{k}} = \\dfrac{{n!}}{{k!\\,(n-k)!}}$',
+                'Formel: $C(n, k) = \\dbinom{n}{k} = \\dfrac{n!}{k!\\,(n-k)!}$',
                 f'$C({n}, {k}) = \\dfrac{{{n}!}}{{{k}!\\cdot {n-k}!}} = {ans}$',
             ]
 
@@ -108,7 +108,7 @@ class CombinatoricsProbabilityGenerator(BaseGenerator):
             )
             steps = [
                 'Vi bryr oss ikke om rekkefølgen, men legger tilbake → kombinasjon med tilbakelegging.',
-                f'Formel: $C(n + k - 1,\\, k) = \\dbinom{{n+k-1}}{{k}}$',
+                'Formel: $C(n + k - 1,\\, k) = \\dbinom{n+k-1}{k}$',
                 f'$C({n}+{k}-1,\\, {k}) = C({n+k-1},\\, {k}) = {ans}$',
             ]
 

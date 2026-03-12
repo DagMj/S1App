@@ -101,7 +101,7 @@ class ProbabilityConditionalGenerator(BaseGenerator):
             f'Hva er sannsynligheten for at eleven {event_txt}, gitt at eleven er {given_txt}?'
         )
         steps = [
-            f'Betinget sannsynlighet: $P(A \\mid B) = \\dfrac{{n(A \\cap B)}}{{n(B)}}$.',
+            'Betinget sannsynlighet: $P(A \\mid B) = \\dfrac{n(A \\cap B)}{n(B)}$.',
             f'$n(B) = {n_b}$ (antall som er {given_txt}).',
             f'$n(A \\cap B) = {n_ab}$ (antall som er {event_txt} OG {given_txt}).',
             f'$P({cond_sym}) = {_frac_latex(prob)}$',

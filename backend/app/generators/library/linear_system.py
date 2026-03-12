@@ -368,7 +368,7 @@ class LinearSystemGenerator(BaseGenerator):
 
         prompt = (
             'Løs likningssystemet\n'
-            + _cases(f'y = x^2', f'x + y = {k}')
+            + _cases('y = x^2', f'x + y = {k}')
             + '\nOppgi løsningsmengden for $x$.'
         )
 

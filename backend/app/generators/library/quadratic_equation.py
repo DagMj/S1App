@@ -76,8 +76,6 @@ class QuadraticEquationGenerator(BaseGenerator):
             disc = b_val**2 - 4 * a_val * c_val  # = lead²*(r1-r2)²
             sqrt_disc = int(disc**0.5)
             prompt = f'Løs likningen $$ {sp.latex(expr)} = 0 $$'
-            x1_num = -b_val + sqrt_disc
-            x2_num = -b_val - sqrt_disc
             denom = 2 * a_val
             steps = [
                 r'Bruk abc-formelen: $x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.',

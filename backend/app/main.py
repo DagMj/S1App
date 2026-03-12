@@ -1,13 +1,14 @@
 import asyncio
 import logging
 import time
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
-from sqlalchemy.orm import Session
 
 import app.models  # noqa: F401
 from app.api.router import api_router
@@ -20,16 +21,27 @@ from app.services.generator_registry_service import registry_service
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    application.state.db_ready = False
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, _startup_sync)
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
     version='0.1.0',
     docs_url='/docs',
     redoc_url='/redoc',
+    lifespan=lifespan,
 )
 
+_cors_origins = [o.strip() for o in settings.cors_origins.split(',') if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=_cors_origins,
     allow_credentials=False,
     allow_methods=['*'],
     allow_headers=['*'],
@@ -114,13 +126,6 @@ def _startup_sync() -> None:
         app.state.db_ready = True
     except Exception as exc:  # pragma: no cover
         logger.exception('Database init failed during startup, running in degraded mode: %s', exc)
-
-
-@app.on_event('startup')
-async def on_startup() -> None:
-    app.state.db_ready = False
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, _startup_sync)
 
 
 @app.get('/health')

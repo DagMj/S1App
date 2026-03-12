@@ -60,7 +60,7 @@ class FactorizationGenerator(BaseGenerator):
             f1 = _shift_factor(n)
             prompt = f'Faktoriser uttrykket $$ {sp.latex(expr)} $$'
             solution_steps = [
-                f'Gjenkjenn 1. kvadratsetning: $a^2 + 2ab + b^2 = (a+b)^2$.',
+                'Gjenkjenn 1. kvadratsetning: $a^2 + 2ab + b^2 = (a+b)^2$.',
                 f'Her er $a=x$ og $b={n}$, siden $2 \\cdot x \\cdot {n} = {2*n}x$ og ${n}^2 = {n**2}$.',
                 f'Svar: $(x+{n})^2$.',
             ]
@@ -72,7 +72,7 @@ class FactorizationGenerator(BaseGenerator):
             factored = (x - n) ** 2
             prompt = f'Faktoriser uttrykket $$ {sp.latex(expr)} $$'
             solution_steps = [
-                f'Gjenkjenn 2. kvadratsetning: $a^2 - 2ab + b^2 = (a-b)^2$.',
+                'Gjenkjenn 2. kvadratsetning: $a^2 - 2ab + b^2 = (a-b)^2$.',
                 f'Her er $a=x$ og $b={n}$, siden $2 \\cdot x \\cdot {n} = {2*n}x$ og ${n}^2 = {n**2}$.',
                 f'Svar: $(x-{n})^2$.',
             ]
@@ -84,7 +84,7 @@ class FactorizationGenerator(BaseGenerator):
             factored = (x + n) * (x - n)
             prompt = f'Faktoriser uttrykket $$ {sp.latex(expr)} $$'
             solution_steps = [
-                f'Gjenkjenn 3. kvadratsetning (konjugatsetningen): $a^2 - b^2 = (a+b)(a-b)$.',
+                'Gjenkjenn 3. kvadratsetning (konjugatsetningen): $a^2 - b^2 = (a+b)(a-b)$.',
                 f'Her er $a=x$ og $b={n}$, siden $x^2 - {n}^2 = x^2 - {n**2}$.',
                 f'Svar: $(x+{n})(x-{n})$.',
             ]

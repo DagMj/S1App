@@ -142,7 +142,7 @@ class ExponentialEquationGenerator(BaseGenerator):
                 u_eq = f'u^2{_signed_term(B, "u")}{_signed_term(C, "")} = 0'
                 correct_answer = sorted([x1, x2])
                 answer_type = 'solution_set'
-                x1_expr = f'$x = 10^{{{u1}}} = {x1}$' if u1 > 0 else f'$x = 10^0 = 1$'
+                x1_expr = f'$x = 10^{{{u1}}} = {x1}$' if u1 > 0 else '$x = 10^0 = 1$'
                 x2_expr = f'$x = 10^{{{u2}}} = {x2}$'
                 steps = [
                     r'La $u = \lg(x)$.',
